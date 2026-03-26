@@ -14,7 +14,7 @@
 - [x] **GAME-03**: Drawing a line that completes a box claims it for the current player
 - [x] **GAME-04**: Completing a box grants the player another turn
 - [x] **GAME-05**: Game ends when all 16 boxes are claimed; player with most boxes wins
-- [ ] **GAME-06**: Board is disabled (pointer-events-none) during opponent's turn
+- [x] **GAME-06**: Board is disabled (pointer-events-none) during opponent's turn
 
 ### Multiplayer
 
@@ -120,7 +120,7 @@
 | GAME-03 | Phase 1 | Complete |
 | GAME-04 | Phase 1 | Complete |
 | GAME-05 | Phase 1 | Complete |
-| GAME-06 | Phase 1 | Pending |
+| GAME-06 | Phase 1 | Complete |
 | INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 1 | Complete |
 | INFRA-05 | Phase 1 | Complete |

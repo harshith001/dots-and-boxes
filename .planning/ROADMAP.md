@@ -11,7 +11,7 @@ Start with a working local game engine and project scaffolding, layer in real-ti
 
 ## Phases
 
-- [ ] **Phase 1: Foundation & Game Engine** - Next.js + Node.js scaffold with a fully playable local Dots & Boxes game
+- [x] **Phase 1: Foundation & Game Engine** - Next.js + Node.js scaffold with a fully playable local Dots & Boxes game (completed 2026-03-26)
 - [ ] **Phase 2: Multiplayer Core** - Real-time matches via Socket.io with matchmaking, private rooms, and bot fallback
 - [ ] **Phase 3: Game UI Polish** - 3-column layout, animations, score bar, turn indicators, and end-game modal
 - [ ] **Phase 4: Social Features** - Emoji reactions with floating animation and predefined chat
@@ -29,12 +29,12 @@ Start with a working local game engine and project scaffolding, layer in real-ti
   3. Completing a box grants the current player another turn; not completing one switches turns
   4. When all 16 boxes are claimed, the game ends and the winner is identified
   5. Both `npm run dev` commands (frontend and backend) start without errors and connect to each other
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 01-01-PLAN.md — Project scaffold (Next.js frontend, Node.js backend, shared types, Vitest)
 - [x] 01-02-PLAN.md — Game engine TDD (game logic, grid geometry, Zustand store)
-- [ ] 01-03-PLAN.md — Game UI (SVG board, player cards, pages, hot-seat wiring)
+- [x] 01-03-PLAN.md — Game UI (SVG board, player cards, pages, hot-seat wiring)
 
 **UI hint**: yes
 
@@ -103,7 +103,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Game Engine | 2/3 | In Progress|  |
+| 1. Foundation & Game Engine | 3/3 | Complete   | 2026-03-26 |
 | 2. Multiplayer Core | 0/TBD | Not started | - |
 | 3. Game UI Polish | 0/TBD | Not started | - |
 | 4. Social Features | 0/TBD | Not started | - |
