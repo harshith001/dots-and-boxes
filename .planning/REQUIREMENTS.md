@@ -9,11 +9,11 @@
 
 ### Game Mechanics
 
-- [ ] **GAME-01**: 5×5 dot grid renders correctly (hLines 5×4, vLines 4×5, boxes 4×4)
-- [ ] **GAME-02**: Player can click an undrawn line segment to draw it
-- [ ] **GAME-03**: Drawing a line that completes a box claims it for the current player
-- [ ] **GAME-04**: Completing a box grants the player another turn
-- [ ] **GAME-05**: Game ends when all 16 boxes are claimed; player with most boxes wins
+- [x] **GAME-01**: 5×5 dot grid renders correctly (hLines 5×4, vLines 4×5, boxes 4×4)
+- [x] **GAME-02**: Player can click an undrawn line segment to draw it
+- [x] **GAME-03**: Drawing a line that completes a box claims it for the current player
+- [x] **GAME-04**: Completing a box grants the player another turn
+- [x] **GAME-05**: Game ends when all 16 boxes are claimed; player with most boxes wins
 - [ ] **GAME-06**: Board is disabled (pointer-events-none) during opponent's turn
 
 ### Multiplayer
@@ -67,7 +67,7 @@
 - [x] **INFRA-02**: Node.js + Socket.io backend as separate process
 - [ ] **INFRA-03**: SQLite (better-sqlite3) for player stats and match history persistence
 - [ ] **INFRA-04**: Username-based sessions via HttpOnly cookie (no OAuth)
-- [ ] **INFRA-05**: Zustand for frontend game state management
+- [x] **INFRA-05**: Zustand for frontend game state management
 - [x] **INFRA-06**: Project runs locally with `npm run dev` in both frontend and backend
 
 ---
@@ -115,15 +115,15 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| GAME-01 | Phase 1 | Pending |
-| GAME-02 | Phase 1 | Pending |
-| GAME-03 | Phase 1 | Pending |
-| GAME-04 | Phase 1 | Pending |
-| GAME-05 | Phase 1 | Pending |
+| GAME-01 | Phase 1 | Complete |
+| GAME-02 | Phase 1 | Complete |
+| GAME-03 | Phase 1 | Complete |
+| GAME-04 | Phase 1 | Complete |
+| GAME-05 | Phase 1 | Complete |
 | GAME-06 | Phase 1 | Pending |
 | INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 1 | Complete |
-| INFRA-05 | Phase 1 | Pending |
+| INFRA-05 | Phase 1 | Complete |
 | INFRA-06 | Phase 1 | Complete |
 | MULTI-01 | Phase 2 | Pending |
 | MULTI-02 | Phase 2 | Pending |

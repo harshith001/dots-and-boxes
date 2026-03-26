@@ -29,11 +29,11 @@ Start with a working local game engine and project scaffolding, layer in real-ti
   3. Completing a box grants the current player another turn; not completing one switches turns
   4. When all 16 boxes are claimed, the game ends and the winner is identified
   5. Both `npm run dev` commands (frontend and backend) start without errors and connect to each other
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [x] 01-01-PLAN.md — Project scaffold (Next.js frontend, Node.js backend, shared types, Vitest)
-- [ ] 01-02-PLAN.md — Game engine TDD (game logic, grid geometry, Zustand store)
+- [x] 01-02-PLAN.md — Game engine TDD (game logic, grid geometry, Zustand store)
 - [ ] 01-03-PLAN.md — Game UI (SVG board, player cards, pages, hot-seat wiring)
 
 **UI hint**: yes
@@ -103,7 +103,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Game Engine | 1/3 | In Progress|  |
+| 1. Foundation & Game Engine | 2/3 | In Progress|  |
 | 2. Multiplayer Core | 0/TBD | Not started | - |
 | 3. Game UI Polish | 0/TBD | Not started | - |
 | 4. Social Features | 0/TBD | Not started | - |
