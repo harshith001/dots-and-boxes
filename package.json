@@ -1,0 +1,14 @@
+{
+  "name": "dots-and-boxes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dots and Boxes multiplayer game",
+  "scripts": {
+    "dev": "concurrently --names \"FE,BE\" --prefix-colors \"cyan,yellow\" \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
