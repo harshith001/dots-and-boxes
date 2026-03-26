@@ -1,7 +1,7 @@
 ---
 phase: 1
 slug: foundation-game-engine
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-03-26
@@ -37,6 +37,7 @@ Declared values (all multiples of 4):
 |-------|-------|-------|
 | xs | 4px | Gap between dot labels, inline icon padding |
 | sm | 8px | Padding inside score chips, gap between score number and label |
+| button | 16px | Vertical padding on buttons (`py-4`) |
 | md | 16px | Default element padding (player cards, page content padding) |
 | lg | 24px | Section padding inside side panels |
 | xl | 32px | Gap between side panels and center board column |
@@ -56,11 +57,11 @@ Touch targets: not applicable (desktop-first, no mobile requirement in Phase 1).
 | Body | 16px | 400 | 1.5 | Player name labels, status text, "Your turn / Opponent's turn" label |
 | Label | 14px | 400 | 1.4 | Score sub-labels ("boxes"), turn status secondary text |
 | Heading | 20px | 600 | 1.2 | Score number displayed in the player card |
-| Display | 28px | 700 | 1.1 | Page title "Dots & Boxes" on the home/start screen |
+| Display | 28px | 600 | 1.1 | Page title "Dots & Boxes" on the home/start screen |
 
 Font size values map to Tailwind: `text-sm` (14px), `text-base` (16px), `text-xl` (20px), `text-3xl` (28px).
 
-Weights map to: `font-normal` (400), `font-semibold` (600), `font-bold` (700).
+Weights map to: `font-normal` (400), `font-semibold` (600).
 
 > Source: design_direction — "Clean sans-serif font (Inter or system-ui)." Sizes and weights determined by researcher as sensible defaults for a game UI at desktop scale.
 
@@ -101,7 +102,7 @@ Accent reserved for (explicit list):
 
 **Home screen** (`/`):
 - Centered single-column layout, `max-w-sm`, vertically centered in viewport
-- "Dots & Boxes" display heading (28px, weight 700)
+- "Dots & Boxes" display heading (28px, weight 600)
 - Username input: `border border-slate-200 rounded-lg px-4 py-2 text-base w-full`
 - "Start Game" button (see CTA spec below)
 
@@ -178,7 +179,7 @@ The SVG renders at a maximum CSS width of 480px (the viewBox is 400×400 user un
 
 ### 5. Start Button / CTA
 
-- `bg-slate-800 text-white text-base font-semibold rounded-lg px-6 py-3 w-full hover:bg-slate-700 transition-colors`
+- `bg-slate-800 text-white text-base font-semibold rounded-lg px-6 py-4 w-full hover:bg-slate-700 transition-colors`
 - No loading state in Phase 1 (local game, instant start)
 
 ### 6. Score Bar (optional Phase 1 shorthand)
