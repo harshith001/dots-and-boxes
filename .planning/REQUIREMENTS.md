@@ -63,12 +63,12 @@
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Next.js frontend with App Router and Tailwind CSS
-- [ ] **INFRA-02**: Node.js + Socket.io backend as separate process
+- [x] **INFRA-01**: Next.js frontend with App Router and Tailwind CSS
+- [x] **INFRA-02**: Node.js + Socket.io backend as separate process
 - [ ] **INFRA-03**: SQLite (better-sqlite3) for player stats and match history persistence
 - [ ] **INFRA-04**: Username-based sessions via HttpOnly cookie (no OAuth)
 - [ ] **INFRA-05**: Zustand for frontend game state management
-- [ ] **INFRA-06**: Project runs locally with `npm run dev` in both frontend and backend
+- [x] **INFRA-06**: Project runs locally with `npm run dev` in both frontend and backend
 
 ---
 
@@ -121,10 +121,10 @@
 | GAME-04 | Phase 1 | Pending |
 | GAME-05 | Phase 1 | Pending |
 | GAME-06 | Phase 1 | Pending |
-| INFRA-01 | Phase 1 | Pending |
-| INFRA-02 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Complete |
+| INFRA-02 | Phase 1 | Complete |
 | INFRA-05 | Phase 1 | Pending |
-| INFRA-06 | Phase 1 | Pending |
+| INFRA-06 | Phase 1 | Complete |
 | MULTI-01 | Phase 2 | Pending |
 | MULTI-02 | Phase 2 | Pending |
 | MULTI-03 | Phase 2 | Pending |
