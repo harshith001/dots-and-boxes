@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getSession, postSession } from '../lib/api';
 
@@ -10,7 +10,7 @@ const GRID_OPTIONS = [
   { dots: 13, label: '13×13', mode: 'GRID_WAR' },
 ] as const;
 
-export default function SetupScreen() {
+function SetupScreenInner() {
   const [name, setName] = useState('');
   const [gridSize, setGridSize] = useState(5);
   const router = useRouter();
@@ -169,5 +169,13 @@ export default function SetupScreen() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function SetupScreen() {
+  return (
+    <Suspense>
+      <SetupScreenInner />
+    </Suspense>
   );
 }
