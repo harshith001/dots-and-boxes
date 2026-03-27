@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getSession, postSession } from '../lib/api';
 
 const GRID_OPTIONS = [
@@ -14,6 +14,8 @@ export default function SetupScreen() {
   const [name, setName] = useState('');
   const [gridSize, setGridSize] = useState(5);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
 
   useEffect(() => {
     getSession().then(session => {
@@ -29,7 +31,7 @@ export default function SetupScreen() {
     await postSession(operatorName).catch(() => null);
     sessionStorage.setItem('operatorName', operatorName);
     sessionStorage.setItem('gridSize', String(gridSize));
-    router.push('/lobby');
+    router.push(redirect ?? '/lobby');
   }
 
   return (

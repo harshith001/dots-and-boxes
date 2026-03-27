@@ -19,9 +19,17 @@ export default function InviteScreen() {
     : '';
 
   useEffect(() => {
+    const name = sessionStorage.getItem('operatorName');
+    if (!name) {
+      router.replace(`/?redirect=/room/${roomId}`);
+      return;
+    }
     const token = getOrCreatePlayerToken();
     const socket = connectSocket();
     setRoomId(roomId);
+
+    // Always emit room:join — backend handles reconnect for creator, join for invitee
+    socket.emit('room:join', { roomId, playerToken: token, playerName: name });
 
     function onGameState(data: GameStateEvent) {
       // Once two players are in the room, navigate to game
