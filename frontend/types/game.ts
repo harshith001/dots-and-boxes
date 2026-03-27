@@ -18,3 +18,58 @@ export interface LocalGameState {
   status: 'active' | 'finished';
   winner: Player | 'draw' | null;
 }
+
+// --- Multiplayer Types ---
+
+export type RoomStatus = 'waiting' | 'active' | 'finished';
+
+export interface RoomPlayer {
+  playerToken: string;   // persistent UUID, survives reconnect
+  socketId: string;      // current socket.id (changes on reconnect)
+  name: string;
+  role: Player;          // 'p1' | 'p2'
+  connected: boolean;
+}
+
+export interface Room {
+  id: string;
+  status: RoomStatus;
+  players: RoomPlayer[];
+  gameState: LocalGameState;
+  createdAt: number;
+}
+
+// Socket event payloads
+
+export interface CreateRoomPayload {
+  playerToken: string;
+  playerName: string;
+}
+
+export interface JoinRoomPayload {
+  roomId: string;
+  playerToken: string;
+  playerName: string;
+}
+
+export interface MakeMovePayload {
+  roomId: string;
+  playerToken: string;
+  move: Move;
+}
+
+export interface LeaveRoomPayload {
+  roomId: string;
+  playerToken: string;
+}
+
+export interface RoomCreatedEvent {
+  roomId: string;
+  playerRole: Player;
+  inviteUrl: string;
+}
+
+export interface GameStateEvent {
+  gameState: LocalGameState;
+  room: Pick<Room, 'id' | 'status' | 'players'>;
+}
