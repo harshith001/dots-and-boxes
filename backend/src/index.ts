@@ -145,15 +145,7 @@ io.on('connection', (socket) => {
     const inviteUrl = `${FRONTEND_URL}/room/${room.id}`;
     socket.emit('room:created', { roomId: room.id, playerRole: 'p1', inviteUrl });
 
-    // Bot fallback after 5 seconds if still waiting
-    setTimeout(() => {
-      const current = roomManager.getRoom(room.id);
-      if (current?.status === 'waiting') {
-        roomManager.addBotToRoom(room.id);
-        emitGameState(room.id);
-        scheduleBotMove(room.id);
-      }
-    }, 5000);
+    // No bot fallback for private rooms — wait for the invited player indefinitely
   });
 
   // Join room (quick match or private invite)
