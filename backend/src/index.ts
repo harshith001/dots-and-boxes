@@ -5,7 +5,8 @@ import cors from 'cors';
 import { roomManager } from './rooms.js';
 import { pickBotMove } from './bot.js';
 import type {
-  CreateRoomPayload, JoinRoomPayload, MakeMovePayload, LeaveRoomPayload
+  CreateRoomPayload, JoinRoomPayload, MakeMovePayload, LeaveRoomPayload,
+  EmojiSendPayload, ChatSendPayload
 } from './types.js';
 
 const app = express();
@@ -21,6 +22,9 @@ const io = new Server(httpServer, {
 
 // Matchmaking queue: playerToken → { socketId, name }
 const queue = new Map<string, { socketId: string; name: string }>();
+
+// Emoji dedup: playerToken → last send timestamp (ms)
+const emojiLastSent = new Map<string, number>();
 
 function emitGameState(roomId: string): void {
   const room = roomManager.getRoom(roomId);
@@ -144,6 +148,35 @@ io.on('connection', (socket) => {
     }
     emitGameState(roomId);
     scheduleBotMove(roomId);
+  });
+
+  // Emoji reaction
+  socket.on('emoji:send', ({ roomId, playerToken, emoji }: EmojiSendPayload) => {
+    const room = roomManager.getRoom(roomId);
+    if (!room) return;
+    const player = room.players.find(p => p.playerToken === playerToken);
+    if (!player) return;
+
+    const now = Date.now();
+    const last = emojiLastSent.get(playerToken) ?? 0;
+    if (now - last < 2000) return; // 2s dedup
+    emojiLastSent.set(playerToken, now);
+
+    io.to(roomId).emit('emoji:received', { emoji, fromRole: player.role });
+  });
+
+  // Chat message
+  socket.on('chat:send', ({ roomId, playerToken, message }: ChatSendPayload) => {
+    const room = roomManager.getRoom(roomId);
+    if (!room) return;
+    const player = room.players.find(p => p.playerToken === playerToken);
+    if (!player) return;
+
+    io.to(roomId).emit('chat:received', {
+      message,
+      fromRole: player.role,
+      fromName: player.name,
+    });
   });
 
   // Leave room

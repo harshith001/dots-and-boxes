@@ -70,3 +70,30 @@ export interface GameStateEvent {
   gameState: LocalGameState;
   room: Pick<Room, 'id' | 'status' | 'players'>;
 }
+
+// --- Social Types ---
+
+export type EmojiReaction = '😎' | '😂' | '😡' | '🔥' | '👏';
+
+export interface EmojiSendPayload {
+  roomId: string;
+  playerToken: string;
+  emoji: EmojiReaction;
+}
+
+export interface ChatSendPayload {
+  roomId: string;
+  playerToken: string;
+  message: string;
+}
+
+export interface EmojiReceivedEvent {
+  emoji: EmojiReaction;
+  fromRole: Player;
+}
+
+export interface ChatReceivedEvent {
+  message: string;
+  fromRole: Player;
+  fromName: string;
+}
