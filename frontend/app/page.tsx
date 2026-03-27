@@ -1,113 +1,123 @@
-import Link from 'next/link';
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function SetupScreen() {
+  const [name, setName] = useState('');
+  const router = useRouter();
+
+  function handleDeploy() {
+    if (!name.trim()) return;
+    sessionStorage.setItem('operatorName', name.trim().toUpperCase());
+    router.push('/lobby');
+  }
+
   return (
-    <main
-      className="min-h-screen flex items-center justify-center relative overflow-hidden"
-      style={{ background: 'radial-gradient(ellipse at 50% 0%, #0f1e3a 0%, #07090f 55%)' }}
-    >
-      {/* Background dot grid */}
-      <div
-        className="absolute inset-0 opacity-[0.04] animate-bg-drift"
-        style={{
-          backgroundImage: 'radial-gradient(circle, #94a3b8 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-        }}
-      />
-
-      {/* Ambient top glow */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, #38bdf8 0%, #f472b6 100%)' }}
-      />
-
-      <div className="relative z-10 w-full max-w-sm px-6 flex flex-col items-center gap-8">
-        {/* Logo mark */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="flex gap-1.5 mb-1">
-            {['#38bdf8', '#f472b6', '#38bdf8', '#f472b6'].map((c, i) => (
-              <div
-                key={i}
-                className="w-2.5 h-2.5 rounded-full"
-                style={{
-                  backgroundColor: c,
-                  boxShadow: `0 0 8px ${c}`,
-                  animationDelay: `${i * 0.4}s`,
-                }}
-              />
-            ))}
-          </div>
-          <h1
-            className="text-5xl font-black tracking-tight text-center"
-            style={{
-              background: 'linear-gradient(135deg, #e2e8f0 30%, #94a3b8)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              letterSpacing: '-0.03em',
-            }}
-          >
-            Dots&nbsp;&amp;&nbsp;Boxes
-          </h1>
-          <p className="text-xs font-medium tracking-widest uppercase" style={{ color: '#334155' }}>
-            Claim the grid. Outplay the opponent.
-          </p>
+    <div className="min-h-screen bg-background text-primary font-body overflow-hidden selection:bg-primary-fixed selection:text-on-primary-fixed">
+      {/* TopAppBar */}
+      <header className="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-14 bg-surface border-b border-surface-variant/20">
+        <div className="flex items-center gap-4">
+          <span className="font-headline font-bold tracking-tighter text-primary text-lg">
+            MONOCHROME_KINETIC_V1.0
+          </span>
+          <div className="h-4 w-px bg-outline-variant opacity-20" />
+          <span className="font-label uppercase tracking-tight text-xs text-secondary">
+            SYSTEM_STATUS: <span className="text-primary-fixed">OPERATIONAL</span>
+          </span>
         </div>
+        <div className="flex items-center gap-6">
+          <span className="material-symbols-outlined text-sm text-secondary cursor-pointer hover:text-primary transition-colors">
+            settings
+          </span>
+        </div>
+      </header>
 
-        {/* Form */}
-        <div className="w-full flex flex-col gap-3">
-          <div className="relative">
-            <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: '#38bdf8' }}>
-              Player 1
-            </label>
-            <input
-              type="text"
-              placeholder="Enter name"
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200 placeholder-slate-600"
-              style={{
-                background: '#0d1117',
-                border: '1px solid #1e2a3a',
-                color: '#e2e8f0',
-              }}
-              onFocus={e => { e.currentTarget.style.borderColor = '#38bdf880'; }}
-              onBlur={e => { e.currentTarget.style.borderColor = '#1e2a3a'; }}
-            />
+      {/* Main */}
+      <main className="relative h-screen w-full flex items-center justify-center pt-14">
+        {/* Dot grid background */}
+        <div className="absolute inset-0 dot-grid opacity-[0.03] pointer-events-none" />
+
+        {/* Panel */}
+        <div className="relative w-full max-w-xl z-10 px-8">
+          {/* Terminal header decoration */}
+          <div className="flex items-center justify-between mb-4 px-2">
+            <div className="flex gap-2">
+              <div className="w-1.5 h-1.5 bg-primary opacity-20" />
+              <div className="w-1.5 h-1.5 bg-primary opacity-20" />
+              <div className="w-1.5 h-1.5 bg-primary opacity-20" />
+            </div>
+            <span className="font-label text-[10px] uppercase tracking-[0.2em] text-secondary opacity-50">
+              AUTH_SEQUENCE_PENDING
+            </span>
           </div>
-          <div className="relative">
-            <label className="block text-xs font-semibold tracking-widest uppercase mb-1.5" style={{ color: '#f472b6' }}>
-              Player 2
-            </label>
-            <input
-              type="text"
-              placeholder="Enter name"
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200 placeholder-slate-600"
-              style={{
-                background: '#0d1117',
-                border: '1px solid #1e2a3a',
-                color: '#e2e8f0',
-              }}
-              onFocus={e => { e.currentTarget.style.borderColor = '#f472b680'; }}
-              onBlur={e => { e.currentTarget.style.borderColor = '#1e2a3a'; }}
-            />
+
+          {/* Main panel */}
+          <div className="bg-surface-container-high/40 backdrop-blur-xl border border-outline-variant/10 p-10 shadow-2xl">
+            <div className="mb-12">
+              <h1 className="font-headline text-3xl font-bold text-primary tracking-tighter mb-2">
+                INITIALIZE_OPERATOR
+              </h1>
+              <p className="font-label text-[10px] uppercase tracking-widest text-secondary/60">
+                ESTABLISHING ENCRYPTED CONNECTION TO GRID_SERVER_01
+              </p>
+            </div>
+
+            <div className="space-y-12">
+              {/* Name input */}
+              <div className="space-y-3">
+                <label className="font-label text-[10px] uppercase tracking-widest text-primary-fixed block">
+                  INITIALIZING_OPERATOR_NAME
+                </label>
+                <div className="relative group">
+                  <input
+                    type="text"
+                    placeholder="ENTER_ID"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleDeploy()}
+                    maxLength={24}
+                    className="w-full bg-transparent border-0 border-b border-outline-variant/30 py-4 font-headline text-xl text-primary placeholder:text-surface-variant focus:ring-0 focus:outline-none transition-colors duration-200 focus:border-primary-fixed"
+                  />
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                    <span className="w-1 h-4 bg-primary-fixed animate-pulse" />
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div className="pt-6 space-y-4">
+                <button
+                  onClick={handleDeploy}
+                  disabled={!name.trim()}
+                  className="w-full h-16 bg-primary-fixed text-on-primary-fixed font-headline font-bold uppercase tracking-widest flex items-center justify-center gap-3 hover:shadow-[0_0_20px_rgba(204,255,0,0.2)] transition-all duration-300 active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  DEPLOY_INITIAL_SEQUENCE
+                  <span className="material-symbols-outlined">double_arrow</span>
+                </button>
+                <div className="flex items-center justify-between px-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-primary-fixed animate-ping" />
+                    <span className="font-label text-[10px] text-secondary/60">SYNCING_ASSETS</span>
+                  </div>
+                  <span className="font-label text-[10px] text-secondary/40 uppercase">VER_2.0.0_STABLE</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 flex justify-between items-start opacity-30">
+            <p className="font-label text-[9px] leading-tight uppercase tracking-tighter max-w-[200px]">
+              WARNING: ALL ACTIONS ARE LOGGED BY CENTRAL_VOID.
+            </p>
+            <div className="text-right">
+              <p className="font-label text-[9px] uppercase tracking-tighter">KINETIC_GRID // TACTICAL DIVISION</p>
+              <p className="font-label text-[9px] text-secondary/60">© 2026 GRID_OPS</p>
+            </div>
           </div>
         </div>
-
-        {/* CTA */}
-        <div className="w-full flex flex-col items-center gap-4">
-          <Link
-            href="/game"
-            className="relative w-full text-center text-sm font-bold tracking-widest uppercase py-4 rounded-xl overflow-hidden transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-            style={{
-              background: 'linear-gradient(135deg, #38bdf8, #818cf8)',
-              color: '#07090f',
-              boxShadow: '0 0 30px rgba(56,189,248,0.3), 0 0 60px rgba(56,189,248,0.15)',
-            }}
-          >
-            Start Game
-          </Link>
-          <p className="text-xs" style={{ color: '#1e2a3a' }}>5×5 grid · Hot-seat · 16 boxes</p>
-        </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

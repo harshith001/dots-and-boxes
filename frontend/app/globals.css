@@ -1,38 +1,89 @@
 @import "tailwindcss";
 
-:root {
-  --bg: #07090f;
-  --surface: #0d1117;
-  --surface-2: #161b27;
-  --border: #1e2a3a;
-  --p1: #38bdf8;
-  --p1-dim: rgba(56, 189, 248, 0.15);
-  --p1-glow: rgba(56, 189, 248, 0.5);
-  --p2: #f472b6;
-  --p2-dim: rgba(244, 114, 182, 0.15);
-  --p2-glow: rgba(244, 114, 182, 0.5);
-  --text: #e2e8f0;
-  --text-muted: #475569;
-  --text-subtle: #1e2a3a;
+/* ── KINETIC_GRID Design Token System ──────────────────── */
+
+@theme {
+  /* Colors */
+  --color-surface:                  #131313;
+  --color-surface-container-lowest: #0e0e0e;
+  --color-surface-container-low:    #1c1b1b;
+  --color-surface-container:        #201f1f;
+  --color-surface-container-high:   #2a2a2a;
+  --color-surface-container-highest:#353534;
+  --color-surface-variant:          #353534;
+  --color-outline-variant:          #444933;
+  --color-outline:                  #8e9379;
+  --color-primary:                  #ffffff;
+  --color-secondary:                #c6c6c7;
+  --color-on-surface:               #e5e2e1;
+  --color-on-surface-variant:       #c4c9ac;
+  --color-primary-fixed:            #c3f400;
+  --color-primary-fixed-dim:        #abd600;
+  --color-on-primary-fixed:         #161e00;
+  --color-on-primary:               #283500;
+  --color-background:               #131313;
+  --color-inverse-surface:          #e5e2e1;
+  --color-secondary-container:      #454747;
+  --color-surface-bright:           #3a3939;
+  --color-surface-dim:              #131313;
+  --color-surface-tint:             #abd600;
+
+  /* Font families — Tailwind v4: --font-{name} maps to font-{name} utility */
+  --font-headline: "Space Grotesk", sans-serif;
+  --font-body:     "Inter", sans-serif;
+  --font-label:    "Space Grotesk", sans-serif;
+
+  /* Border radius — all sharp corners, only full retained */
+  --radius:    0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl:0px;
+  --radius-full: 9999px;
 }
 
-@theme inline {
-  --color-background: var(--bg);
-  --color-foreground: var(--text);
+/* ── Material Symbols ──────────────────────────────────── */
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24;
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
 }
+
+/* ── Dot grid background ───────────────────────────────── */
+
+.dot-grid {
+  background-image: radial-gradient(circle, #ffffff 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── Kinetic glow ──────────────────────────────────────── */
+
+.kinetic-glow {
+  box-shadow: 0 0 15px rgba(204, 255, 0, 0.15);
+}
+
+/* ── Base ──────────────────────────────────────────────── */
 
 * {
   box-sizing: border-box;
 }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #131313;
+  color: #ffffff;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Animations ─────────────────────────────────────── */
+/* ── Legacy animations (game board) ───────────────────── */
 
 @keyframes box-claim {
   0%   { opacity: 0; transform: scale(0.5) rotate(-8deg); }
@@ -46,13 +97,13 @@ body {
 }
 
 @keyframes glow-pulse-p1 {
-  0%, 100% { box-shadow: 0 0 12px var(--p1-glow), 0 0 30px rgba(56,189,248,0.2), inset 0 0 12px rgba(56,189,248,0.05); }
-  50%       { box-shadow: 0 0 24px var(--p1-glow), 0 0 60px rgba(56,189,248,0.3), inset 0 0 20px rgba(56,189,248,0.08); }
+  0%, 100% { box-shadow: 0 0 12px rgba(195,244,0,0.5), 0 0 30px rgba(195,244,0,0.2); }
+  50%       { box-shadow: 0 0 24px rgba(195,244,0,0.7), 0 0 60px rgba(195,244,0,0.3); }
 }
 
 @keyframes glow-pulse-p2 {
-  0%, 100% { box-shadow: 0 0 12px var(--p2-glow), 0 0 30px rgba(244,114,182,0.2), inset 0 0 12px rgba(244,114,182,0.05); }
-  50%       { box-shadow: 0 0 24px var(--p2-glow), 0 0 60px rgba(244,114,182,0.3), inset 0 0 20px rgba(244,114,182,0.08); }
+  0%, 100% { box-shadow: 0 0 12px rgba(195,244,0,0.3), 0 0 30px rgba(195,244,0,0.15); }
+  50%       { box-shadow: 0 0 24px rgba(195,244,0,0.5), 0 0 60px rgba(195,244,0,0.25); }
 }
 
 @keyframes turn-slide {
@@ -76,12 +127,6 @@ body {
   33%  { transform: translate(20px, -15px) rotate(0.5deg); }
   66%  { transform: translate(-10px, 10px) rotate(-0.3deg); }
   100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-@keyframes dot-ping {
-  0%   { transform: scale(1); opacity: 0.4; }
-  50%  { transform: scale(2.5); opacity: 0; }
-  100% { transform: scale(2.5); opacity: 0; }
 }
 
 .animate-box-claim    { animation: box-claim 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
