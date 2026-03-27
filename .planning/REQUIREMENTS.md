@@ -18,7 +18,7 @@
 
 ### Multiplayer
 
-- [ ] **MULTI-01**: Player can enter a username and start a quick match session
+- [x] **MULTI-01**: Player can enter a username and start a quick match session
 - [ ] **MULTI-02**: Quick match places player in a matchmaking queue
 - [ ] **MULTI-03**: If no opponent found within 5 seconds, a bot opponent is assigned
 - [ ] **MULTI-04**: Player can create a private room and receive a shareable invite link
@@ -125,7 +125,7 @@
 | INFRA-02 | Phase 1 | Complete |
 | INFRA-05 | Phase 1 | Complete |
 | INFRA-06 | Phase 1 | Complete |
-| MULTI-01 | Phase 2 | Pending |
+| MULTI-01 | Phase 2 | Complete |
 | MULTI-02 | Phase 2 | Pending |
 | MULTI-03 | Phase 2 | Pending |
 | MULTI-04 | Phase 2 | Pending |

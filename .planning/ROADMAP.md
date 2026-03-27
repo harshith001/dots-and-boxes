@@ -51,7 +51,14 @@ Plans:
   4. Game state updates (moves, turn changes, scores) appear in real-time on both players' screens
   5. If a player's connection drops and reconnects, they rejoin their game with correct state restored
   6. The remaining player sees an opponent-disconnected message when the other player leaves
-**Plans**: TBD
+**Plans**: 0/3 plans complete
+
+Plans:
+- [x] 02-01-PLAN.md — KINETIC_GRID design system + Setup Screen (INITIALIZE_OPERATOR)
+- [ ] 02-02-PLAN.md — Socket.io backend + room engine + lobby page
+- [ ] 02-03-PLAN.md — Invite Screen, multiplayer game page, live board sync
+
+**UI hint**: yes (Stitch project 14285055703179592596 — 4 screens: Cyber-Noir App, Minimal Board, Setup Screen, Invite Screen)
 
 ---
 
@@ -104,7 +111,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Game Engine | 3/3 | Complete   | 2026-03-26 |
-| 2. Multiplayer Core | 0/TBD | Not started | - |
+| 2. Multiplayer Core | 0/3 | Planned | - |
 | 3. Game UI Polish | 0/TBD | Not started | - |
 | 4. Social Features | 0/TBD | Not started | - |
 | 5. Stats & Leaderboard | 0/TBD | Not started | - |
