@@ -72,8 +72,12 @@ Plans:
   3. The current player's turn is highlighted; the opponent is visually dimmed; the board is unclickable on the opponent's turn
   4. Drawing a line plays a stroke-reveal animation (~200ms); claiming a box plays a scale-up pulse
   5. When the game ends, a modal overlays the board showing the winner, final scores, and Play Again / Dashboard buttons
-**Plans**: TBD
+**Plans**: 2/2 plans complete
 **UI hint**: yes
+
+Plans:
+- [x] 03-01-PLAN.md — 3-column layout with PlayerCard active/dim states (completed 2026-03-26)
+- [x] 03-02-PLAN.md — SVG line-draw and box-claim animations (completed 2026-03-26)
 
 ---
 
@@ -112,6 +116,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation & Game Engine | 3/3 | Complete   | 2026-03-26 |
 | 2. Multiplayer Core | 2/3 | In Progress|  |
-| 3. Game UI Polish | 0/TBD | Not started | - |
+| 3. Game UI Polish | 2/2 | Complete | 2026-03-26 |
 | 4. Social Features | 0/TBD | Not started | - |
 | 5. Stats & Leaderboard | 0/TBD | Not started | - |
