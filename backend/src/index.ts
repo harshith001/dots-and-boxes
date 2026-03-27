@@ -2,8 +2,10 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { roomManager } from './rooms.js';
 import { pickBotMove } from './bot.js';
+import { recordMatch, getPlayerStats, getMatchHistory, getLeaderboard, upsertPlayer } from './db.js';
 import type {
   CreateRoomPayload, JoinRoomPayload, MakeMovePayload, LeaveRoomPayload,
   EmojiSendPayload, ChatSendPayload
@@ -12,8 +14,59 @@ import type {
 const app = express();
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000';
 
-app.use(cors({ origin: FRONTEND_URL }));
+app.use(cors({ origin: FRONTEND_URL, credentials: true }));
+app.use(express.json());
+app.use(cookieParser());
 app.get('/health', (_req, res) => res.json({ ok: true }));
+
+// ── Session (operator identity) ────────────────────────────────────────────
+
+app.post('/api/session', (req, res) => {
+  const { name } = req.body as { name?: string };
+  if (!name || typeof name !== 'string' || !name.trim()) {
+    res.status(400).json({ error: 'name is required' });
+    return;
+  }
+  const operatorName = name.trim().toUpperCase().slice(0, 24);
+  upsertPlayer(operatorName);
+  res.cookie('operatorName', operatorName, {
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+  });
+  res.json({ operatorName });
+});
+
+app.get('/api/session', (req, res) => {
+  const operatorName = (req.cookies as Record<string, string>)['operatorName'];
+  if (!operatorName) {
+    res.status(401).json({ error: 'no session' });
+    return;
+  }
+  res.json({ operatorName });
+});
+
+app.delete('/api/session', (_req, res) => {
+  res.clearCookie('operatorName');
+  res.json({ ok: true });
+});
+
+// ── Stats & Leaderboard ────────────────────────────────────────────────────
+
+app.get('/api/stats/:username', (req, res) => {
+  const { username } = req.params;
+  if (!username) {
+    res.status(400).json({ error: 'username required' });
+    return;
+  }
+  const stats = getPlayerStats(username);
+  const history = getMatchHistory(username);
+  res.json({ stats, history });
+});
+
+app.get('/api/leaderboard', (_req, res) => {
+  res.json({ leaderboard: getLeaderboard() });
+});
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -25,6 +78,9 @@ const queue = new Map<string, { socketId: string; name: string }>();
 
 // Emoji dedup: playerToken → last send timestamp (ms)
 const emojiLastSent = new Map<string, number>();
+
+// Track rooms whose match result has already been recorded
+const recordedRooms = new Set<string>();
 
 function emitGameState(roomId: string): void {
   const room = roomManager.getRoom(roomId);
@@ -38,6 +94,23 @@ function emitGameState(roomId: string): void {
       winner: room.gameState.winner,
       scores: room.gameState.scores,
     });
+    // Record match exactly once per room
+    if (!recordedRooms.has(room.id)) {
+      recordedRooms.add(room.id);
+      const p1 = room.players.find(p => p.role === 'p1');
+      const p2 = room.players.find(p => p.role === 'p2');
+      if (p1 && p2 && p2.socketId !== 'BOT') {
+        const scoreP1 = room.gameState.scores['p1'] ?? 0;
+        const scoreP2 = room.gameState.scores['p2'] ?? 0;
+        let winner: string | null = null;
+        if (room.gameState.winner === 'p1') winner = p1.name;
+        else if (room.gameState.winner === 'p2') winner = p2.name;
+        // Ensure both players exist in DB
+        upsertPlayer(p1.name);
+        upsertPlayer(p2.name);
+        recordMatch(room.id, p1.name, p2.name, winner, scoreP1, scoreP2);
+      }
+    }
   }
 }
 
