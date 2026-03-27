@@ -111,12 +111,12 @@ export default function MultiplayerGamePage() {
     getSocket().emit('chat:send', { roomId, playerToken: token, message });
   }
 
-  const isMyTurn = gameState?.currentTurn === playerRole;
   const p1Score = gameState?.scores.p1 ?? 0;
   const p2Score = gameState?.scores.p2 ?? 0;
   const isFinished = gameState?.status === 'finished';
 
   const myRole = playerRole ?? 'p1';
+  const isMyTurn = gameState?.currentTurn === myRole;
   const oppRole = myRole === 'p1' ? 'p2' : 'p1';
   const myScore = myRole === 'p1' ? p1Score : p2Score;
   const oppScore = myRole === 'p1' ? p2Score : p1Score;
