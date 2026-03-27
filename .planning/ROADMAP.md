@@ -109,8 +109,12 @@ Plans:
   3. The dashboard shows the last 10 matches with opponent name, result, and score
   4. The leaderboard shows the top players ranked by wins with rank, username, and win count
   5. The leaderboard data refreshes at most every 30 seconds (polling, not live push)
-**Plans**: TBD
+**Plans**: 2/2 plans complete
 **UI hint**: yes
+
+Plans:
+- [x] 05-01-PLAN.md — SQLite persistence, session cookie API, stats + leaderboard endpoints (completed 2026-03-26)
+- [x] 05-02-PLAN.md — Dashboard, leaderboard, session cookie restore (completed 2026-03-26)
 
 ---
 
@@ -122,4 +126,4 @@ Plans:
 | 2. Multiplayer Core | 2/3 | In Progress|  |
 | 3. Game UI Polish | 2/2 | Complete | 2026-03-26 |
 | 4. Social Features | 2/2 | Complete | 2026-03-26 |
-| 5. Stats & Leaderboard | 0/TBD | Not started | - |
+| 5. Stats & Leaderboard | 2/2 | Complete | 2026-03-26 |
