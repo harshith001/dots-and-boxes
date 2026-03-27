@@ -5,7 +5,6 @@ import { useRouter, useParams } from 'next/navigation';
 import { connectSocket, getSocket } from '@/lib/socket';
 import { useGameStore, getOrCreatePlayerToken } from '@/store/gameStore';
 import GameBoard from '@/components/game/GameBoard';
-import { PlayerCard } from '@/components/game/PlayerCard';
 import { EmojiPanel } from '@/components/game/EmojiPanel';
 import { ChatPanel } from '@/components/game/ChatPanel';
 import type { GameStateEvent, Move, EmojiReaction, EmojiReceivedEvent, ChatReceivedEvent } from '@/types/game';
@@ -13,7 +12,7 @@ import type { GameStateEvent, Move, EmojiReaction, EmojiReceivedEvent, ChatRecei
 interface FloatingEmoji {
   id: number;
   emoji: EmojiReaction;
-  x: number; // percent 10–80
+  x: number;
 }
 
 export default function MultiplayerGamePage() {
@@ -38,6 +37,12 @@ export default function MultiplayerGamePage() {
     ? sessionStorage.getItem('operatorName') ?? 'OP_01'
     : 'OP_01';
 
+  const gridSize = typeof window !== 'undefined'
+    ? parseInt(sessionStorage.getItem('gridSize') ?? '5')
+    : 5;
+
+  const gridLabel = gridSize === 5 ? '5×5' : gridSize === 9 ? '9×9' : '13×13';
+
   useEffect(() => {
     const token = getOrCreatePlayerToken();
     const name = sessionStorage.getItem('operatorName') ?? 'OPERATOR';
@@ -52,7 +57,7 @@ export default function MultiplayerGamePage() {
 
       const now = new Date().toLocaleTimeString('en-US', { hour12: false });
       const turn = data.gameState.currentTurn === 'p1' ? 'OP_01' : 'OP_02';
-      setLog(prev => [...prev.slice(-20), `[${now}] TURN: ${turn}`]);
+      setLog(prev => [...prev.slice(-40), `[${now}] TURN: ${turn}`]);
     }
 
     function onOpponentDisconnected() {
@@ -62,7 +67,7 @@ export default function MultiplayerGamePage() {
 
     function onEmojiReceived(event: EmojiReceivedEvent) {
       const id = ++emojiIdCounter.current;
-      const x = Math.floor(Math.random() * 70) + 10; // 10–80%
+      const x = Math.floor(Math.random() * 70) + 10;
       setFloatingEmojis(prev => [...prev, { id, emoji: event.emoji, x }]);
       setTimeout(() => {
         setFloatingEmojis(prev => prev.filter(e => e.id !== id));
@@ -87,7 +92,6 @@ export default function MultiplayerGamePage() {
     };
   }, [roomId, applyServerState, setOpponentDisconnected]);
 
-  // Scroll telemetry log to bottom
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [log]);
@@ -116,112 +120,143 @@ export default function MultiplayerGamePage() {
   const oppRole = myRole === 'p1' ? 'p2' : 'p1';
   const myScore = myRole === 'p1' ? p1Score : p2Score;
   const oppScore = myRole === 'p1' ? p2Score : p1Score;
-  const myIsActive = isMyTurn && !isFinished;
-  const oppIsActive = !isMyTurn && !isFinished;
+  const isMyTurnActive = isMyTurn && !isFinished;
+  const isOppTurnActive = !isMyTurn && !isFinished;
+
+  const myAccent = myRole === 'p1' ? '#ffffff' : '#c3f400';
+  const oppAccent = oppRole === 'p1' ? '#ffffff' : '#c3f400';
 
   return (
-    <div className="min-h-screen bg-background text-primary font-body overflow-hidden">
-      {/* TopNav */}
-      <header className="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-surface/80 backdrop-blur-xl border-b border-surface-variant/20">
-        <div className="font-headline text-lg font-bold tracking-tighter uppercase">KINETIC_GRID</div>
+    <div className="h-screen bg-[#0a0a0a] text-white font-body flex flex-col overflow-hidden">
+      {/* Header */}
+      <header className="h-14 flex items-center justify-between px-6 bg-[#111111] border-b border-[#1e1e1e] shrink-0">
+        <span className="font-headline font-bold tracking-tighter text-white text-lg">KINETIC_GRID</span>
         <div className="hidden md:flex items-center gap-8">
-          <span className="font-label text-[10px] tracking-widest text-secondary">
-            ROOM: <span className="text-primary-fixed">{roomId}</span>
+          <span className="font-label text-[10px] tracking-widest text-[#555555]">
+            ROOM: <span className="text-[#c3f400]">{roomId}</span>
           </span>
-          <span className="font-label text-[10px] tracking-widest text-secondary">
-            OPERATOR: <span className="text-primary">{myName}</span>
+          <span className="font-label text-[10px] tracking-widest text-[#555555]">
+            OPERATOR: <span className="text-white">{myName}</span>
           </span>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="material-symbols-outlined text-secondary hover:text-primary-fixed cursor-pointer transition-colors">help</span>
-        </div>
+        <span
+          className="material-symbols-outlined text-[#555555] hover:text-white cursor-pointer transition-colors"
+          style={{ fontSize: '18px' }}
+        >
+          help
+        </span>
       </header>
 
-      {/* SideNav */}
-      <aside className="fixed left-0 top-0 h-full hidden lg:flex flex-col items-center py-20 z-40 bg-surface w-20 border-r border-surface-variant/20">
-        <div className="mb-12 flex flex-col items-center">
-          <div className="font-headline text-white font-black text-xs tracking-tighter">
-            {playerRole?.toUpperCase() ?? 'OP'}
-          </div>
-          <div className="text-primary-fixed text-[8px] font-bold tracking-[0.2em]">
-            {isMyTurn ? 'YOUR_TURN' : 'WAITING'}
-          </div>
-        </div>
-        <div className="flex flex-col gap-10">
-          {[
-            { icon: 'grid_4x4', label: 'GRID', active: true },
-            { icon: 'leaderboard', label: 'LB', active: false },
-          ].map(({ icon, label, active }) => (
-            <div
-              key={icon}
-              className={`flex flex-col items-center gap-2 cursor-pointer transition-all duration-100 ${
-                active
-                  ? 'text-primary-fixed border-r-2 border-primary-fixed pr-2'
-                  : 'text-surface-container-highest hover:text-primary'
-              }`}
-            >
-              <span className="material-symbols-outlined">{icon}</span>
-              <span className="font-label text-[9px] tracking-widest uppercase">{label}</span>
-            </div>
-          ))}
-        </div>
-      </aside>
+      {/* 3-column body */}
+      <div className="flex-1 flex overflow-hidden">
 
-      <main className="relative h-screen flex items-center justify-center pt-16 lg:pl-20">
-        {/* Left Telemetry Panel */}
-        <section className="hidden xl:flex fixed left-24 top-20 bottom-20 w-56 z-30 flex-col">
-          <div className="bg-surface/10 backdrop-blur-xl border-l border-t border-outline-variant/20 p-4 h-full flex flex-col">
-            <header className="flex justify-between items-center mb-4">
-              <h2 className="font-headline text-[10px] tracking-[0.3em] uppercase text-secondary">Telemetry_Feed</h2>
-              <span className="w-2 h-2 bg-primary-fixed block" />
-            </header>
+        {/* ── Left Panel (me) ── */}
+        <div className="w-[180px] shrink-0 flex flex-col bg-[#0e0e0e] border-r border-[#1e1e1e]">
+          {/* Role badge + turn indicator */}
+          <div className="flex items-center gap-2 px-5 pt-5 pb-2">
+            <div
+              className="w-8 h-5 flex items-center justify-center font-headline text-[9px] font-bold tracking-widest shrink-0"
+              style={{ border: `1px solid ${myAccent}25`, color: myAccent }}
+            >
+              {myRole.toUpperCase()}
+            </div>
+            {isMyTurnActive && (
+              <>
+                <div
+                  className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0"
+                  style={{ backgroundColor: myAccent }}
+                />
+                <span
+                  className="font-label text-[8px] tracking-widest truncate"
+                  style={{ color: myAccent }}
+                >
+                  YOUR_TURN
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* Name */}
+          <div className="px-5 font-label text-[11px] tracking-widest text-[#555555] truncate">
+            {myName}
+          </div>
+
+          {/* Score */}
+          <div className="px-5 pt-2 pb-4 flex items-baseline gap-1.5">
+            <span
+              className="font-headline text-5xl font-black tabular-nums transition-all duration-300"
+              style={{
+                color: myAccent,
+                textShadow: isMyTurnActive ? `0 0 24px ${myAccent}50` : 'none',
+              }}
+            >
+              {myScore}
+            </span>
+            <span className="font-label text-[9px] tracking-widest text-[#333333]">PTS</span>
+          </div>
+
+          {/* Telemetry */}
+          <div className="flex-1 flex flex-col overflow-hidden border-t border-[#1a1a1a] px-5 pt-3 min-h-0">
+            <div className="font-label text-[8px] tracking-widest text-[#333333] mb-2 flex items-center gap-2">
+              TELEMETRY_FEED
+              <span className="w-1 h-1 bg-[#c3f400] animate-pulse" />
+            </div>
             <div
               ref={logRef}
-              className="flex-1 overflow-y-auto space-y-2 font-mono text-[10px] leading-relaxed text-secondary/60"
+              className="flex-1 overflow-y-auto space-y-1.5 font-mono text-[9px] leading-relaxed"
             >
               {log.map((entry, i) => (
-                <div key={i} className={entry.includes('[SYSTEM]') || entry.includes('[WARN]') ? 'text-primary-fixed' : ''}>
+                <div
+                  key={i}
+                  style={{
+                    color: entry.includes('[SYSTEM]')
+                      ? '#c3f400'
+                      : entry.includes('[WARN]')
+                        ? '#ff6b35'
+                        : '#3a3a3a',
+                  }}
+                >
                   {entry}
                 </div>
               ))}
             </div>
-            <div className="mt-4 pt-4 border-t border-outline-variant/20">
-              <div className="flex items-center gap-2 text-[10px] font-headline tracking-widest text-outline">
-                <span className="animate-pulse">_</span> LIVE_FEED
+          </div>
+
+          {/* Footer metadata */}
+          <div className="px-5 pb-5 pt-3 border-t border-[#1a1a1a] space-y-2 shrink-0">
+            <div>
+              <div className="font-label text-[8px] text-[#2a2a2a] tracking-widest">GRID_SCALE</div>
+              <div className="font-headline text-[10px] text-[#4a4a4a]">{gridLabel}</div>
+            </div>
+            <div>
+              <div className="font-label text-[8px] text-[#2a2a2a] tracking-widest">STATUS</div>
+              <div
+                className="font-headline text-[10px]"
+                style={{ color: isFinished ? '#3a3a3a' : '#c3f400' }}
+              >
+                {isFinished ? 'COMPLETE' : 'ACTIVE'}
               </div>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* 3-column board layout */}
-        <div className="flex items-center gap-4 px-4">
-          {/* Left PlayerCard — me */}
-          <div className="w-44 shrink-0">
-            <PlayerCard
-              name={myName}
-              score={myScore}
-              role={myRole}
-              isActive={myIsActive}
-              isMe={true}
-            />
+        {/* ── Center: board + emoji ── */}
+        <div className="flex-1 flex flex-col items-center overflow-hidden py-4 px-4 gap-3">
+          {/* Turn bar */}
+          <div className="font-label text-[10px] tracking-widest uppercase w-full text-center shrink-0">
+            {isFinished ? (
+              <span className="text-[#c3f400]">GAME_COMPLETE</span>
+            ) : isMyTurn ? (
+              <span className="text-[#c3f400] animate-pulse">YOUR_TURN ▸</span>
+            ) : (
+              <span className="text-[#444444]">OPPONENT_CALCULATING...</span>
+            )}
           </div>
 
-          {/* Center — board + turn indicator + social */}
-          <div className="flex-1 min-w-0 flex flex-col items-center gap-4">
-            {/* Turn indicator */}
-            <div className="font-label text-[10px] tracking-widest uppercase">
-              {isFinished ? (
-                <span className="text-primary-fixed">GAME_COMPLETE</span>
-              ) : isMyTurn ? (
-                <span className="text-primary-fixed animate-pulse">YOUR_TURN ▸</span>
-              ) : (
-                <span className="text-secondary/60">OPPONENT_CALCULATING...</span>
-              )}
-            </div>
-
-            {/* Game board with floating emojis */}
-            {gameState && (
-              <div className="relative">
+          {/* Board */}
+          <div className="flex-1 flex items-center justify-center w-full relative min-h-0">
+            {gameState ? (
+              <>
                 <GameBoard
                   gameState={gameState}
                   onLineClick={handleLineClick}
@@ -230,108 +265,145 @@ export default function MultiplayerGamePage() {
                 {floatingEmojis.map(fe => (
                   <span
                     key={fe.id}
-                    className="animate-emoji-float"
+                    className="animate-emoji-float absolute pointer-events-none"
                     style={{ left: `${fe.x}%`, bottom: '20%' }}
                   >
                     {fe.emoji}
                   </span>
                 ))}
-              </div>
-            )}
-
-            {!gameState && (
-              <div className="font-label text-[10px] tracking-widest text-secondary/40 animate-pulse">
+              </>
+            ) : (
+              <div className="font-label text-[10px] tracking-widest text-[#333333] animate-pulse">
                 ESTABLISHING_GRID_CONNECTION...
               </div>
             )}
-
-            {/* Social panels */}
-            <div className="flex flex-col items-center gap-3 w-full max-w-sm">
-              <EmojiPanel onSend={handleEmojiSend} />
-              <ChatPanel
-                onSend={handleChatSend}
-                log={chatLog}
-                myRole={myRole}
-                myName={myName}
-              />
-            </div>
-
-            {/* Mobile score fallback */}
-            <div className="flex md:hidden items-center gap-6 font-headline mt-2">
-              <div className="text-center">
-                <div className="text-[9px] tracking-widest text-secondary truncate max-w-[80px]">{myName}</div>
-                <div className="text-2xl font-bold text-primary">{myScore}</div>
-              </div>
-              <div className="text-secondary/30">—</div>
-              <div className="text-center">
-                <div className="text-[9px] tracking-widest text-secondary truncate max-w-[80px]">{opponentName || 'OPPONENT'}</div>
-                <div className="text-2xl font-bold text-primary-fixed">{oppScore}</div>
-              </div>
-            </div>
           </div>
 
-          {/* Right PlayerCard — opponent */}
-          <div className="w-44 shrink-0">
-            <PlayerCard
-              name={opponentName || 'OPPONENT'}
-              score={oppScore}
-              role={oppRole}
-              isActive={oppIsActive}
-              isMe={false}
-            />
+          {/* Emoji panel */}
+          <div className="shrink-0">
+            <EmojiPanel onSend={handleEmojiSend} />
           </div>
         </div>
 
-        {/* Opponent disconnected overlay */}
-        {opponentDisconnected && (
-          <div className="fixed inset-0 bg-background/90 backdrop-blur-xl z-50 flex items-center justify-center">
-            <div className="text-center space-y-6">
-              <h2 className="font-headline text-2xl tracking-tighter">OPPONENT_DISCONNECTED</h2>
-              <p className="font-label text-[10px] tracking-widest text-secondary/60">GRID SESSION TERMINATED</p>
+        {/* ── Right Panel (opponent + comms) ── */}
+        <div className="w-[220px] shrink-0 flex flex-col bg-[#0e0e0e] border-l border-[#1e1e1e]">
+          {/* P2 info card */}
+          <div className="bg-[#141414] px-5 pt-5 pb-4 shrink-0 flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-8 h-5 flex items-center justify-center font-headline text-[9px] font-bold tracking-widest shrink-0"
+                style={{ border: `1px solid ${oppAccent}25`, color: oppAccent }}
+              >
+                {oppRole.toUpperCase()}
+              </div>
+              {isOppTurnActive && (
+                <div
+                  className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0"
+                  style={{ backgroundColor: oppAccent }}
+                />
+              )}
+            </div>
+            <div className="font-label text-[11px] tracking-widest text-[#555555] truncate">
+              {opponentName || 'AWAITING...'}
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span
+                className="font-headline text-5xl font-black tabular-nums transition-all duration-300"
+                style={{
+                  color: oppAccent,
+                  textShadow: isOppTurnActive ? `0 0 24px ${oppAccent}50` : 'none',
+                }}
+              >
+                {oppScore}
+              </span>
+              <span className="font-label text-[9px] tracking-widest text-[#333333]">PTS</span>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="h-px bg-[#1e1e1e] shrink-0" />
+
+          {/* Comms Panel */}
+          <div className="flex-1 flex flex-col bg-[#111111] overflow-hidden min-h-0">
+            {/* Voice section */}
+            <div className="px-4 py-3 shrink-0 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="font-label text-[8px] tracking-widest text-[#555555]">VOICE_CHANNEL</span>
+                <span className="font-label text-[7px] tracking-widest text-[#c3f400] border border-[#c3f40025] px-1.5 py-0.5">
+                  WEBRTC·PENDING
+                </span>
+              </div>
+              <button
+                disabled
+                className="w-full flex items-center justify-center gap-1.5 h-8 border border-[#1e1e1e] text-[#333333] font-label text-[8px] tracking-widest cursor-not-allowed"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>mic_off</span>
+                JOIN_VOICE
+              </button>
+            </div>
+
+            {/* Chat divider */}
+            <div className="h-px bg-[#1a1a1a] shrink-0" />
+
+            {/* Chat */}
+            <ChatPanel
+              onSend={handleChatSend}
+              log={chatLog}
+              myRole={myRole}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Opponent disconnected overlay */}
+      {opponentDisconnected && (
+        <div className="fixed inset-0 bg-[#0a0a0a]/90 backdrop-blur-xl z-50 flex items-center justify-center">
+          <div className="text-center space-y-6">
+            <h2 className="font-headline text-2xl tracking-tighter">OPPONENT_DISCONNECTED</h2>
+            <p className="font-label text-[10px] tracking-widest text-[#555555]">GRID SESSION TERMINATED</p>
+            <button
+              onClick={() => router.push('/lobby')}
+              className="px-8 py-4 bg-[#c3f400] text-black font-headline font-bold tracking-widest hover:shadow-[0_0_20px_rgba(195,244,0,0.2)] transition-all"
+            >
+              RETURN_TO_LOBBY
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Game end overlay */}
+      {isFinished && !opponentDisconnected && (
+        <div className="fixed inset-0 bg-[#0a0a0a]/80 backdrop-blur-xl z-50 flex items-center justify-center">
+          <div className="relative bg-[#111111] border border-[#222222] p-12 max-w-md w-full text-center space-y-8">
+            <div className="absolute top-0 left-0 w-8 h-px bg-[#c3f400]" />
+            <div className="absolute top-0 left-0 w-px h-8 bg-[#c3f400]" />
+            <h2 className="font-headline text-3xl font-bold tracking-tighter">
+              {gameState.winner === null
+                ? 'DRAW_DETECTED'
+                : gameState.winner === playerRole
+                  ? 'VICTORY_CONFIRMED'
+                  : 'DEFEAT_LOGGED'}
+            </h2>
+            <div className="font-label text-[10px] tracking-widest text-[#555555]">
+              FINAL_SCORE: {p1Score} — {p2Score}
+            </div>
+            <div className="flex gap-4 justify-center">
               <button
                 onClick={() => router.push('/lobby')}
-                className="px-8 py-4 bg-primary-fixed text-on-primary-fixed font-headline font-bold tracking-widest hover:shadow-[0_0_20px_rgba(204,255,0,0.2)] transition-all"
+                className="px-8 py-4 bg-[#c3f400] text-black font-headline font-bold tracking-widest hover:shadow-[0_0_20px_rgba(195,244,0,0.2)] transition-all"
               >
-                RETURN_TO_LOBBY
+                PLAY_AGAIN
+              </button>
+              <button
+                onClick={() => router.push('/')}
+                className="px-8 py-4 border border-[#222222] text-[#555555] font-headline font-bold tracking-widest hover:text-white transition-colors"
+              >
+                EXIT_GRID
               </button>
             </div>
           </div>
-        )}
-
-        {/* Game end overlay */}
-        {isFinished && !opponentDisconnected && (
-          <div className="fixed inset-0 bg-background/80 backdrop-blur-xl z-50 flex items-center justify-center">
-            <div className="relative bg-surface-container border border-outline-variant/20 p-12 max-w-md w-full text-center space-y-8">
-              <div className="absolute top-0 left-0 w-8 h-px bg-primary-fixed" />
-              <div className="absolute top-0 left-0 w-px h-8 bg-primary-fixed" />
-              <h2 className="font-headline text-3xl font-bold tracking-tighter">
-                {gameState.winner === null
-                  ? 'DRAW_DETECTED'
-                  : gameState.winner === playerRole
-                    ? 'VICTORY_CONFIRMED'
-                    : 'DEFEAT_LOGGED'}
-              </h2>
-              <div className="font-label text-[10px] tracking-widest text-secondary/60">
-                FINAL_SCORE: {p1Score} — {p2Score}
-              </div>
-              <div className="flex gap-4 justify-center">
-                <button
-                  onClick={() => router.push('/lobby')}
-                  className="px-8 py-4 bg-primary-fixed text-on-primary-fixed font-headline font-bold tracking-widest hover:shadow-[0_0_20px_rgba(204,255,0,0.2)] transition-all"
-                >
-                  PLAY_AGAIN
-                </button>
-                <button
-                  onClick={() => router.push('/')}
-                  className="px-8 py-4 border border-outline-variant/40 text-secondary font-headline font-bold tracking-widest hover:text-primary transition-colors"
-                >
-                  EXIT_GRID
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   );
 }

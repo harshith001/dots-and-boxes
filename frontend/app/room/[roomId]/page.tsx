@@ -18,6 +18,14 @@ export default function InviteScreen() {
     ? `${window.location.origin}/room/${roomId}`
     : '';
 
+  const gridSize = typeof window !== 'undefined'
+    ? parseInt(sessionStorage.getItem('gridSize') ?? '5')
+    : 5;
+  const gridLabel = gridSize === 5 ? '5×5_TACTICAL' : gridSize === 9 ? '9×9_STANDARD' : '13×13_GRID_WAR';
+  const region = typeof window !== 'undefined'
+    ? window.location.hostname.replace('www.', '').toUpperCase()
+    : 'REMOTE';
+
   useEffect(() => {
     const name = sessionStorage.getItem('operatorName');
     if (!name) {
@@ -137,9 +145,8 @@ export default function InviteScreen() {
             {/* Footer metadata */}
             <div className="mt-12 flex flex-wrap gap-x-8 gap-y-4 pt-8 border-t border-surface-variant/10">
               {[
-                { label: 'GRID_SCALE', value: '5×5_TACTICAL' },
+                { label: 'GRID_SCALE', value: gridLabel },
                 { label: 'SECURITY', value: 'END_TO_END' },
-                { label: 'REGION', value: 'LOCAL_HOST' },
               ].map(({ label, value }) => (
                 <div key={label} className="flex flex-col">
                   <span className="font-label text-[9px] text-secondary/40 tracking-widest">{label}</span>
