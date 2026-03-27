@@ -253,10 +253,10 @@ export default function MultiplayerGamePage() {
             )}
           </div>
 
-          {/* Board */}
-          <div className="flex-1 flex items-center justify-center w-full relative min-h-0">
+          {/* Board — square container constrained by available height */}
+          <div className="flex-1 flex items-center justify-center w-full min-h-0 overflow-hidden">
             {gameState ? (
-              <>
+              <div className="relative" style={{ height: '100%', aspectRatio: '1 / 1', maxWidth: '100%' }}>
                 <GameBoard
                   gameState={gameState}
                   onLineClick={handleLineClick}
@@ -271,7 +271,7 @@ export default function MultiplayerGamePage() {
                     {fe.emoji}
                   </span>
                 ))}
-              </>
+              </div>
             ) : (
               <div className="font-label text-[10px] tracking-widest text-[#333333] animate-pulse">
                 ESTABLISHING_GRID_CONNECTION...

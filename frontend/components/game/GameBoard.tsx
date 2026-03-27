@@ -146,13 +146,13 @@ export function GameBoard({ gameState, onMove, disabled = false, onLineClick, is
   const ambientColor = playerColor(gameState.currentTurn);
 
   return (
-    <div className="relative select-none cursor-crosshair w-full">
+    <div className="relative select-none cursor-crosshair w-full h-full">
       <div
         className="absolute -inset-8 rounded-3xl opacity-20 blur-3xl pointer-events-none transition-all duration-700"
         style={{ background: `radial-gradient(ellipse, ${ambientColor} 0%, transparent 70%)` }}
       />
       <div
-        className="relative"
+        className="relative h-full"
         style={{
           background: 'radial-gradient(ellipse at 50% 40%, #1a1a1a 0%, #0e0e0e 100%)',
           border: '1px solid #252525',
@@ -161,7 +161,7 @@ export function GameBoard({ gameState, onMove, disabled = false, onLineClick, is
       >
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className={`w-full block${isDisabled ? ' pointer-events-none opacity-60' : ''}`}
+          className={`w-full h-full block${isDisabled ? ' pointer-events-none opacity-60' : ''}`}
         >
           <defs>
             {/* P1 box fill: white tint */}
