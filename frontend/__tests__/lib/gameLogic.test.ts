@@ -7,7 +7,7 @@ describe('initGameState', () => {
     expect(state.hLines.length).toBe(5);
     state.hLines.forEach((row) => {
       expect(row.length).toBe(4);
-      row.forEach((cell) => expect(cell).toBe(false));
+      row.forEach((cell) => expect(cell).toBeNull());
     });
   });
 
@@ -16,7 +16,7 @@ describe('initGameState', () => {
     expect(state.vLines.length).toBe(4);
     state.vLines.forEach((row) => {
       expect(row.length).toBe(5);
-      row.forEach((cell) => expect(cell).toBe(false));
+      row.forEach((cell) => expect(cell).toBeNull());
     });
   });
 
@@ -42,13 +42,13 @@ describe('applyMoveLogic - line drawing (GAME-02)', () => {
   it('GAME-02: drawing horizontal line sets hLines[row][col] to true', () => {
     const state = initGameState();
     const next = applyMoveLogic(state, { type: 'h', row: 0, col: 0 });
-    expect(next.hLines[0][0]).toBe(true);
+    expect(next.hLines[0][0]).toBe('p1');
   });
 
   it('GAME-02: drawing vertical line sets vLines[row][col] to true', () => {
     const state = initGameState();
     const next = applyMoveLogic(state, { type: 'v', row: 0, col: 0 });
-    expect(next.vLines[0][0]).toBe(true);
+    expect(next.vLines[0][0]).toBe('p1');
   });
 
   it('GAME-02: drawing an already-drawn line is a no-op (returns same state)', () => {
@@ -61,7 +61,7 @@ describe('applyMoveLogic - line drawing (GAME-02)', () => {
   it('GAME-02: drawing a line does not mutate input state', () => {
     const state = initGameState();
     applyMoveLogic(state, { type: 'h', row: 0, col: 0 });
-    expect(state.hLines[0][0]).toBe(false);
+    expect(state.hLines[0][0]).toBeNull();
   });
 });
 
@@ -84,7 +84,7 @@ describe('findCompletedBoxes (GAME-03)', () => {
     // Simulate adding the final right side to the lines without applying to game state
     const testHLines = s.hLines.map((row) => [...row]);
     const testVLines = s.vLines.map((row) => [...row]);
-    testVLines[0][1] = true; // right side of box(0,0)
+    testVLines[0][1] = 'p1'; // right side of box(0,0)
     const result = findCompletedBoxes(testHLines, testVLines, s.boxes);
     expect(result).toEqual([{ row: 0, col: 0 }]);
   });

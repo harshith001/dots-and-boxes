@@ -10,8 +10,8 @@ export interface Move {
 }
 
 export interface LocalGameState {
-  hLines: boolean[][];      // gridSize rows x (gridSize-1) cols
-  vLines: boolean[][];      // (gridSize-1) rows x gridSize cols
+  hLines: (Player | null)[][];
+  vLines: (Player | null)[][];
   boxes: (Player | null)[][]; // (gridSize-1) rows x (gridSize-1) cols
   scores: { p1: number; p2: number };
   currentTurn: Player;

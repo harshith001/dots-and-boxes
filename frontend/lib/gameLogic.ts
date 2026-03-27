@@ -2,8 +2,8 @@ import type { LocalGameState, Move, Player } from '@/types/game';
 
 export function initGameState(gridSize = 5): LocalGameState {
   return {
-    hLines: Array.from({ length: gridSize }, () => Array(gridSize - 1).fill(false)),
-    vLines: Array.from({ length: gridSize - 1 }, () => Array(gridSize).fill(false)),
+    hLines: Array.from({ length: gridSize }, () => Array(gridSize - 1).fill(null)),
+    vLines: Array.from({ length: gridSize - 1 }, () => Array(gridSize).fill(null)),
     boxes: Array.from({ length: gridSize - 1 }, () => Array(gridSize - 1).fill(null)),
     scores: { p1: 0, p2: 0 },
     currentTurn: 'p1',
@@ -14,8 +14,8 @@ export function initGameState(gridSize = 5): LocalGameState {
 }
 
 export function findCompletedBoxes(
-  hLines: boolean[][],
-  vLines: boolean[][],
+  hLines: (Player | null)[][],
+  vLines: (Player | null)[][],
   existingBoxes: (Player | null)[][]
 ): Array<{ row: number; col: number }> {
   const completed: Array<{ row: number; col: number }> = [];
@@ -41,17 +41,17 @@ export function applyMoveLogic(state: LocalGameState, move: Move): LocalGameStat
   if (state.status !== 'active') return state;
 
   // Check if line already drawn
-  if (move.type === 'h' && state.hLines[move.row][move.col]) return state;
-  if (move.type === 'v' && state.vLines[move.row][move.col]) return state;
+  if (move.type === 'h' && state.hLines[move.row][move.col] !== null) return state;
+  if (move.type === 'v' && state.vLines[move.row][move.col] !== null) return state;
 
   // Deep copy line arrays
   const newHLines = state.hLines.map((row) => [...row]);
   const newVLines = state.vLines.map((row) => [...row]);
 
   if (move.type === 'h') {
-    newHLines[move.row][move.col] = true;
+    newHLines[move.row][move.col] = state.currentTurn;
   } else {
-    newVLines[move.row][move.col] = true;
+    newVLines[move.row][move.col] = state.currentTurn;
   }
 
   // Find newly completed boxes

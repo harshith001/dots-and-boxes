@@ -7,8 +7,8 @@ export interface Move {
 }
 
 export interface LocalGameState {
-  hLines: boolean[][];      // gridSize rows x (gridSize-1) cols
-  vLines: boolean[][];      // (gridSize-1) rows x gridSize cols
+  hLines: (Player | null)[][];      // gridSize rows x (gridSize-1) cols — value = player who drew it
+  vLines: (Player | null)[][];      // (gridSize-1) rows x gridSize cols — value = player who drew it
   boxes: (Player | null)[][]; // (gridSize-1) rows x (gridSize-1) cols
   scores: { p1: number; p2: number };
   currentTurn: Player;

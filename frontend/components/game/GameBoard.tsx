@@ -20,11 +20,10 @@ interface GameBoardProps {
 }
 
 // KINETIC_GRID colors
-const P1_COLOR   = '#ffffff';           // Player 1 = white
-const P2_COLOR   = '#c3f400';           // Player 2 = electric lime
-const LINE_DRAWN = '#4a4a4a';
-const LINE_IDLE  = '#252525';
-const DOT_COLOR  = '#444444';
+const P1_COLOR = '#ffffff';     // Player 1 = white
+const P2_COLOR = '#c3f400';     // Player 2 = electric lime
+const LINE_IDLE = '#2a2a2a';
+const DOT_COLOR = '#555555';
 
 function playerColor(p: Player) {
   return p === 'p1' ? P1_COLOR : P2_COLOR;
@@ -50,10 +49,10 @@ export function GameBoard({ gameState, onMove, disabled = false, onLineClick, is
   useEffect(() => {
     const lines = new Set<string>();
     gameState.hLines.forEach((row, r) => {
-      row.forEach((drawn, c) => { if (drawn) lines.add(`h-${r}-${c}`); });
+      row.forEach((val, c) => { if (val !== null) lines.add(`h-${r}-${c}`); });
     });
     gameState.vLines.forEach((row, r) => {
-      row.forEach((drawn, c) => { if (drawn) lines.add(`v-${r}-${c}`); });
+      row.forEach((val, c) => { if (val !== null) lines.add(`v-${r}-${c}`); });
     });
     drawnLinesRef.current = lines;
 
@@ -79,60 +78,65 @@ export function GameBoard({ gameState, onMove, disabled = false, onLineClick, is
   function renderLine(
     key: string,
     coords: { x1: number; y1: number; x2: number; y2: number },
-    drawn: boolean,
+    drawnBy: Player | null,
     move: Move,
   ) {
     const isHovered = hoveredLine === key;
     const lineLength = Math.hypot(coords.x2 - coords.x1, coords.y2 - coords.y1);
-    const isNewlyDrawn = drawn && !drawnLinesRef.current.has(key);
+    const isNewlyDrawn = drawnBy !== null && !drawnLinesRef.current.has(key);
 
-    // Track this line as seen once it's drawn
-    if (drawn) {
+    if (drawnBy !== null) {
       drawnLinesRef.current.add(key);
     }
 
-    // The drawn glow/accent line
-    const drawnStroke = LINE_DRAWN;
+    const drawnColor = drawnBy ? playerColor(drawnBy) : LINE_IDLE;
 
     return (
       <g
         key={key}
-        style={{ cursor: drawn ? 'default' : 'crosshair' }}
-        onClick={() => { if (!drawn) handleLineClick(move); }}
-        onMouseEnter={() => { if (!drawn) setHoveredLine(key); }}
+        style={{ cursor: drawnBy ? 'default' : 'crosshair' }}
+        onClick={() => { if (!drawnBy) handleLineClick(move); }}
+        onMouseEnter={() => { if (!drawnBy) setHoveredLine(key); }}
         onMouseLeave={() => setHoveredLine(null)}
       >
-        {(drawn || isHovered) && (
+        {/* Glow layer: drawn lines get a soft player-color glow; hover gets a strong glow */}
+        {(drawnBy || isHovered) && (
           <line
             x1={coords.x1} y1={coords.y1}
             x2={coords.x2} y2={coords.y2}
-            stroke={drawn ? drawnStroke : hoverColor}
-            strokeWidth={18}
+            stroke={drawnBy ? drawnColor : hoverColor}
+            strokeWidth={isHovered ? 22 : 14}
             strokeLinecap="round"
-            opacity={drawn ? 0.08 : 0.3}
-            style={{ filter: 'blur(4px)' }}
+            opacity={isHovered ? 0.35 : 0.12}
+            style={{ filter: `blur(${isHovered ? 6 : 4}px)` }}
           />
         )}
+        {/* Main line */}
         <line
           x1={coords.x1} y1={coords.y1}
           x2={coords.x2} y2={coords.y2}
-          stroke={drawn ? drawnStroke : isHovered ? hoverColor : LINE_IDLE}
-          strokeWidth={drawn ? 5 : isHovered ? 5 : 2}
+          stroke={drawnBy ? drawnColor : isHovered ? hoverColor : LINE_IDLE}
+          strokeWidth={drawnBy ? 5 : isHovered ? 5 : 2}
           strokeLinecap="round"
           strokeDasharray={isNewlyDrawn ? lineLength : undefined}
           className={isNewlyDrawn ? 'animate-line-draw' : undefined}
           style={{
             transition: !isNewlyDrawn ? 'stroke 0.12s ease, stroke-width 0.12s ease' : undefined,
-            filter: isHovered ? `drop-shadow(0 0 8px ${hoverColor}66)` : 'none',
+            filter: isHovered
+              ? `drop-shadow(0 0 10px ${hoverColor}) drop-shadow(0 0 4px ${hoverColor})`
+              : drawnBy
+                ? `drop-shadow(0 0 3px ${drawnColor}66)`
+                : 'none',
             ...( isNewlyDrawn ? { '--line-length': lineLength } as CSSProperties : {} ),
           }}
         />
-        {!drawn && (
+        {/* Invisible wide hit area for easy clicking */}
+        {!drawnBy && (
           <line
             x1={coords.x1} y1={coords.y1}
             x2={coords.x2} y2={coords.y2}
             stroke="transparent"
-            strokeWidth={24}
+            strokeWidth={28}
           />
         )}
       </g>
@@ -142,13 +146,13 @@ export function GameBoard({ gameState, onMove, disabled = false, onLineClick, is
   const ambientColor = playerColor(gameState.currentTurn);
 
   return (
-    <div className="relative select-none cursor-crosshair">
+    <div className="relative select-none cursor-crosshair w-full">
       <div
-        className="absolute -inset-8 rounded-3xl opacity-25 blur-3xl pointer-events-none transition-all duration-700"
+        className="absolute -inset-8 rounded-3xl opacity-20 blur-3xl pointer-events-none transition-all duration-700"
         style={{ background: `radial-gradient(ellipse, ${ambientColor} 0%, transparent 70%)` }}
       />
       <div
-        className="relative rounded-none p-2"
+        className="relative"
         style={{
           background: 'radial-gradient(ellipse at 50% 40%, #1a1a1a 0%, #0e0e0e 100%)',
           border: '1px solid #252525',
@@ -157,18 +161,18 @@ export function GameBoard({ gameState, onMove, disabled = false, onLineClick, is
       >
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className={`w-full max-w-[480px] block${isDisabled ? ' pointer-events-none opacity-60' : ''}`}
+          className={`w-full block${isDisabled ? ' pointer-events-none opacity-60' : ''}`}
         >
           <defs>
-            {/* P1 box fill: white/10 tint */}
+            {/* P1 box fill: white tint */}
             <radialGradient id="p1-box" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.05" />
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.18" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.06" />
             </radialGradient>
-            {/* P2 box fill: lime/10 tint */}
+            {/* P2 box fill: lime tint */}
             <radialGradient id="p2-box" cx="50%" cy="50%" r="60%">
-              <stop offset="0%" stopColor="#c3f400" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#c3f400" stopOpacity="0.05" />
+              <stop offset="0%" stopColor="#c3f400" stopOpacity="0.18" />
+              <stop offset="100%" stopColor="#c3f400" stopOpacity="0.06" />
             </radialGradient>
             <filter id="dot-glow" x="-80%" y="-80%" width="260%" height="260%">
               <feGaussianBlur stdDeviation="2.5" result="blur" />
@@ -186,13 +190,8 @@ export function GameBoard({ gameState, onMove, disabled = false, onLineClick, is
               const { fill } = playerBoxFill(owner);
               const boxKey = `box-${r}-${c}`;
               const isNewlyClaimed = !claimedBoxesRef.current.has(boxKey);
+              if (owner) claimedBoxesRef.current.add(boxKey);
 
-              // Track this box as seen
-              if (owner) {
-                claimedBoxesRef.current.add(boxKey);
-              }
-
-              // P1: white/40 border; P2: lime/40 border
               const borderStroke = owner === 'p1' ? 'rgba(255,255,255,0.4)' : 'rgba(195,244,0,0.4)';
               return (
                 <g
@@ -200,22 +199,22 @@ export function GameBoard({ gameState, onMove, disabled = false, onLineClick, is
                   className={isNewlyClaimed ? 'animate-box-claim' : undefined}
                   style={isNewlyClaimed ? { transformBox: 'fill-box', transformOrigin: 'center' } : undefined}
                 >
-                  <rect x={rect.x} y={rect.y} width={rect.width} height={rect.height} fill={fill} rx={0} />
-                  <rect x={rect.x} y={rect.y} width={rect.width} height={rect.height} fill="none" stroke={borderStroke} strokeWidth={1} rx={0} />
+                  <rect x={rect.x} y={rect.y} width={rect.width} height={rect.height} fill={fill} />
+                  <rect x={rect.x} y={rect.y} width={rect.width} height={rect.height} fill="none" stroke={borderStroke} strokeWidth={1} />
                 </g>
               );
             })
           )}
 
           {gameState.hLines.map((row, r) =>
-            row.map((drawn, c) =>
-              renderLine(`h-${r}-${c}`, hLineCoords(r, c), drawn, { type: 'h', row: r, col: c })
+            row.map((drawnBy, c) =>
+              renderLine(`h-${r}-${c}`, hLineCoords(r, c), drawnBy, { type: 'h', row: r, col: c })
             )
           )}
 
           {gameState.vLines.map((row, r) =>
-            row.map((drawn, c) =>
-              renderLine(`v-${r}-${c}`, vLineCoords(r, c), drawn, { type: 'v', row: r, col: c })
+            row.map((drawnBy, c) =>
+              renderLine(`v-${r}-${c}`, vLineCoords(r, c), drawnBy, { type: 'v', row: r, col: c })
             )
           )}
 

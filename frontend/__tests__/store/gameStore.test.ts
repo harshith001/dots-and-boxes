@@ -24,7 +24,7 @@ describe('gameStore', () => {
     useGameStore.getState().startGame();
     useGameStore.getState().makeMove({ type: 'h', row: 0, col: 0 });
     const gs = useGameStore.getState().gameState;
-    expect(gs!.hLines[0][0]).toBe(true);
+    expect(gs!.hLines[0][0]).toBe('p1');
   });
 
   it('makeMove on null gameState is no-op', () => {

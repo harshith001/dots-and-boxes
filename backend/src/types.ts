@@ -9,8 +9,8 @@ export interface Move {
 }
 
 export interface LocalGameState {
-  hLines: boolean[][];
-  vLines: boolean[][];
+  hLines: (Player | null)[][];
+  vLines: (Player | null)[][];
   boxes: (Player | null)[][];
   scores: { p1: number; p2: number };
   currentTurn: Player;

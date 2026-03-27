@@ -91,7 +91,7 @@ export default function GamePage() {
 
       {/* Game area */}
       <div className="relative z-10 flex-1 flex items-center justify-center px-6 py-8">
-        <div className="grid grid-cols-[220px_1fr_220px] gap-8 items-center w-full max-w-[940px]">
+        <div className="grid grid-cols-[200px_1fr_200px] gap-6 items-center w-full max-w-[1200px]">
 
           {/* P1 card */}
           <PlayerCard

@@ -207,7 +207,7 @@ export default function MultiplayerGamePage() {
           </div>
 
           {/* Center — board + turn indicator + social */}
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex-1 min-w-0 flex flex-col items-center gap-4">
             {/* Turn indicator */}
             <div className="font-label text-[10px] tracking-widest uppercase">
               {isFinished ? (
