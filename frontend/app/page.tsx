@@ -1,15 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { getSession, postSession } from '../lib/api';
 
 export default function SetupScreen() {
   const [name, setName] = useState('');
   const router = useRouter();
 
-  function handleDeploy() {
+  useEffect(() => {
+    getSession().then(session => {
+      if (session?.operatorName) {
+        setName(session.operatorName);
+      }
+    });
+  }, []);
+
+  async function handleDeploy() {
     if (!name.trim()) return;
-    sessionStorage.setItem('operatorName', name.trim().toUpperCase());
+    const operatorName = name.trim().toUpperCase().slice(0, 24);
+    await postSession(operatorName).catch(() => null);
+    sessionStorage.setItem('operatorName', operatorName);
     router.push('/lobby');
   }
 
