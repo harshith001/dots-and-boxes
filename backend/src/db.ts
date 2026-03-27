@@ -107,6 +107,7 @@ const stmtGetLeaderboardRaw = db.prepare(`
     SUM(CASE WHEN m.winner = p.username THEN 1 ELSE 0 END) AS wins
   FROM players p
   LEFT JOIN matches m ON (m.player1 = p.username OR m.player2 = p.username)
+  WHERE p.username NOT LIKE '%_BOT'
   GROUP BY p.username
   ORDER BY wins DESC, totalMatches DESC
   LIMIT 50

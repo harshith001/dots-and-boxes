@@ -99,7 +99,7 @@ function emitGameState(roomId: string): void {
       recordedRooms.add(room.id);
       const p1 = room.players.find(p => p.role === 'p1');
       const p2 = room.players.find(p => p.role === 'p2');
-      if (p1 && p2 && p2.socketId !== 'BOT') {
+      if (p1 && p2) {
         const scoreP1 = room.gameState.scores['p1'] ?? 0;
         const scoreP2 = room.gameState.scores['p2'] ?? 0;
         let winner: string | null = null;
