@@ -2,14 +2,46 @@ import { create } from 'zustand';
 import { initGameState, applyMoveLogic } from '@/lib/gameLogic';
 import type { LocalGameState, Move } from '@/types/game';
 
-interface GameStore {
+// --- Multiplayer helpers ---
+
+export function getOrCreatePlayerToken(): string {
+  let token = sessionStorage.getItem('playerToken');
+  if (!token) {
+    token = crypto.randomUUID();
+    sessionStorage.setItem('playerToken', token);
+  }
+  return token;
+}
+
+// --- Store interfaces ---
+
+interface MultiplayerState {
+  roomId: string | null;
+  playerRole: 'p1' | 'p2' | null;
+  playerToken: string | null;
+  opponentName: string | null;
+  connectionStatus: 'idle' | 'connecting' | 'connected' | 'disconnected';
+  opponentDisconnected: boolean;
+}
+
+interface GameStore extends MultiplayerState {
   gameState: LocalGameState | null;
+  // Local game actions
   startGame: () => void;
   makeMove: (move: Move) => void;
   resetGame: () => void;
+  // Multiplayer actions
+  setRoomId: (roomId: string | null) => void;
+  setPlayerRole: (role: 'p1' | 'p2' | null) => void;
+  setPlayerToken: (token: string | null) => void;
+  setOpponentName: (name: string | null) => void;
+  setConnectionStatus: (status: MultiplayerState['connectionStatus']) => void;
+  setOpponentDisconnected: (v: boolean) => void;
+  applyServerState: (gameState: LocalGameState) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
+  // Local game state
   gameState: null,
   startGame: () => set({ gameState: initGameState() }),
   makeMove: (move) =>
@@ -18,4 +50,21 @@ export const useGameStore = create<GameStore>((set) => ({
       return { gameState: applyMoveLogic(s.gameState, move) };
     }),
   resetGame: () => set({ gameState: null }),
+
+  // Multiplayer state — initial values
+  roomId: null,
+  playerRole: null,
+  playerToken: null,
+  opponentName: null,
+  connectionStatus: 'idle',
+  opponentDisconnected: false,
+
+  // Multiplayer actions
+  setRoomId: (roomId) => set({ roomId }),
+  setPlayerRole: (playerRole) => set({ playerRole }),
+  setPlayerToken: (playerToken) => set({ playerToken }),
+  setOpponentName: (opponentName) => set({ opponentName }),
+  setConnectionStatus: (connectionStatus) => set({ connectionStatus }),
+  setOpponentDisconnected: (opponentDisconnected) => set({ opponentDisconnected }),
+  applyServerState: (gameState) => set({ gameState }),
 }));
