@@ -90,8 +90,12 @@ Plans:
   2. The emoji panel is dimmed for 2.5s after use; the server silently drops duplicate sends within 2s
   3. The chat panel shows 3 predefined message buttons; clicking one appears in both players' chat logs
   4. Each chat button has a 1.5s per-button cooldown after sending
-**Plans**: TBD
+**Plans**: 2/2 plans complete
 **UI hint**: yes
+
+Plans:
+- [x] 04-01-PLAN.md — Social socket events — emoji dedup + chat broadcast (completed 2026-03-26)
+- [x] 04-02-PLAN.md — Emoji reactions + predefined chat with floating animation (completed 2026-03-26)
 
 ---
 
@@ -117,5 +121,5 @@ Plans:
 | 1. Foundation & Game Engine | 3/3 | Complete   | 2026-03-26 |
 | 2. Multiplayer Core | 2/3 | In Progress|  |
 | 3. Game UI Polish | 2/2 | Complete | 2026-03-26 |
-| 4. Social Features | 0/TBD | Not started | - |
+| 4. Social Features | 2/2 | Complete | 2026-03-26 |
 | 5. Stats & Leaderboard | 0/TBD | Not started | - |
