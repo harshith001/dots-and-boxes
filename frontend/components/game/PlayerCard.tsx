@@ -1,84 +1,83 @@
-import type { Player } from '@/types/game';
+'use client';
 
 interface PlayerCardProps {
-  player: Player;
   name: string;
   score: number;
+  role: 'p1' | 'p2';
   isActive: boolean;
+  isMe: boolean;
 }
 
-export function PlayerCard({ player, name, score, isActive }: PlayerCardProps) {
-  const isP1     = player === 'p1';
-  const color    = isP1 ? '#38bdf8' : '#f472b6';
-  const dimColor = isP1 ? 'rgba(56,189,248,0.12)' : 'rgba(244,114,182,0.12)';
-  const glowClass = isActive ? (isP1 ? 'animate-glow-p1' : 'animate-glow-p2') : '';
+export function PlayerCard({ name, score, role, isActive, isMe }: PlayerCardProps) {
+  const isP1 = role === 'p1';
+  // P1 = white, P2 = electric lime (matching KINETIC_GRID board colors)
+  const accentColor = isP1 ? '#ffffff' : '#c3f400';
+  const accentDim   = isP1 ? 'rgba(255,255,255,0.06)' : 'rgba(195,244,0,0.06)';
 
   return (
     <div
-      className={`relative rounded-2xl p-5 transition-all duration-500 ${glowClass}`}
+      className="relative flex flex-col gap-3 p-4 transition-all duration-300"
       style={{
-        background: isActive
-          ? `linear-gradient(145deg, ${dimColor}, #0d1117 60%)`
-          : 'linear-gradient(145deg, #0d1117, #0a0e1a)',
-        border: `1px solid ${isActive ? color + '40' : '#1e2a3a'}`,
-        transform: isActive ? 'scale(1.02)' : 'scale(1)',
-        transition: 'transform 0.3s ease, border-color 0.3s ease, background 0.3s ease',
+        background: isActive ? `linear-gradient(160deg, ${accentDim}, #0e0e0e 70%)` : '#0e0e0e',
+        border: `1px solid ${isActive ? accentColor + '30' : '#252525'}`,
+        opacity: isActive ? 1 : 0.4,
       }}
     >
-      {/* Active top edge accent */}
+      {/* Accent top edge */}
       <div
-        className="absolute top-0 left-1/4 right-1/4 h-px rounded-full transition-opacity duration-300"
+        className="absolute top-0 left-0 right-0 h-px transition-opacity duration-300"
         style={{
-          background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
+          background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`,
           opacity: isActive ? 1 : 0,
         }}
       />
 
-      {/* Player badge */}
+      {/* Role badge */}
       <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold tracking-widest mb-4"
+        className="w-8 h-8 flex items-center justify-center font-headline text-[10px] font-bold tracking-widest"
         style={{
-          background: `linear-gradient(135deg, ${color}25, ${color}08)`,
-          border: `1px solid ${color}30`,
-          color,
+          border: `1px solid ${accentColor}25`,
+          color: accentColor,
         }}
       >
         {isP1 ? 'P1' : 'P2'}
       </div>
 
-      <p className="text-xs font-medium tracking-widest uppercase mb-2" style={{ color: '#475569' }}>
-        {name}
-      </p>
+      {/* Name */}
+      <div className="font-label text-[10px] tracking-widest uppercase truncate" style={{ color: '#5a5a5a' }}>
+        {isMe ? `${name} (YOU)` : name}
+      </div>
 
-      <div className="flex items-baseline gap-2">
+      {/* Score */}
+      <div className="flex items-baseline gap-1.5">
         <span
-          className="text-5xl font-black tabular-nums"
+          className="font-headline text-4xl font-black tabular-nums"
           style={{
-            color,
-            textShadow: isActive ? `0 0 30px ${color}80` : 'none',
+            color: accentColor,
+            textShadow: isActive ? `0 0 24px ${accentColor}60` : 'none',
             transition: 'text-shadow 0.3s ease',
           }}
         >
           {score}
         </span>
-        <span className="text-xs" style={{ color: '#334155' }}>boxes</span>
+        <span className="font-label text-[9px] tracking-widest" style={{ color: '#3a3a3a' }}>PTS</span>
       </div>
 
-      {/* Status pill */}
-      <div className="mt-4 flex items-center gap-2 h-5">
+      {/* Active indicator */}
+      <div className="flex items-center gap-2 h-4">
         {isActive ? (
           <>
             <div
               className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ backgroundColor: color, boxShadow: `0 0 6px ${color}` }}
+              style={{ backgroundColor: accentColor, boxShadow: `0 0 6px ${accentColor}` }}
             />
-            <span className="text-xs font-semibold tracking-widest uppercase" style={{ color }}>
-              Your turn
+            <span className="font-label text-[9px] tracking-widest uppercase" style={{ color: accentColor }}>
+              YOUR TURN
             </span>
           </>
         ) : (
-          <span className="text-xs tracking-widest uppercase" style={{ color: '#1e2a3a' }}>
-            Waiting
+          <span className="font-label text-[9px] tracking-widest uppercase" style={{ color: '#252525' }}>
+            WAITING
           </span>
         )}
       </div>

@@ -95,10 +95,11 @@ export default function GamePage() {
 
           {/* P1 card */}
           <PlayerCard
-            player="p1"
+            role="p1"
             name="Player 1"
             score={gameState.scores.p1}
             isActive={!isFinished && gameState.currentTurn === 'p1'}
+            isMe={true}
           />
 
           {/* Board column */}
@@ -151,10 +152,11 @@ export default function GamePage() {
 
           {/* P2 card */}
           <PlayerCard
-            player="p2"
+            role="p2"
             name="Player 2"
             score={gameState.scores.p2}
             isActive={!isFinished && gameState.currentTurn === 'p2'}
+            isMe={false}
           />
 
         </div>

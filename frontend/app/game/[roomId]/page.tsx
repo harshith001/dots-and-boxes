@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { connectSocket, getSocket } from '@/lib/socket';
 import { useGameStore, getOrCreatePlayerToken } from '@/store/gameStore';
 import GameBoard from '@/components/game/GameBoard';
+import { PlayerCard } from '@/components/game/PlayerCard';
 import type { GameStateEvent, Move } from '@/types/game';
 
 export default function MultiplayerGamePage() {
@@ -72,6 +73,14 @@ export default function MultiplayerGamePage() {
   const p1Score = gameState?.scores.p1 ?? 0;
   const p2Score = gameState?.scores.p2 ?? 0;
   const isFinished = gameState?.status === 'finished';
+
+  // Derive names and roles for each side
+  const myRole = playerRole ?? 'p1';
+  const oppRole = myRole === 'p1' ? 'p2' : 'p1';
+  const myScore = myRole === 'p1' ? p1Score : p2Score;
+  const oppScore = myRole === 'p1' ? p2Score : p1Score;
+  const myIsActive = isMyTurn && !isFinished;
+  const oppIsActive = !isMyTurn && !isFinished;
 
   return (
     <div className="min-h-screen bg-background text-primary font-body overflow-hidden">
@@ -147,50 +156,71 @@ export default function MultiplayerGamePage() {
           </div>
         </section>
 
-        {/* Board area */}
-        <div className="flex flex-col items-center gap-6">
-          {/* Score bar */}
-          <div className="flex items-center gap-8 font-headline">
-            <div className="text-center">
-              <div className="text-[10px] tracking-widest text-secondary">{myName}</div>
-              <div className={`text-3xl font-bold ${playerRole === 'p1' ? 'text-primary' : 'text-primary-fixed'}`}>
-                {playerRole === 'p1' ? p1Score : p2Score}
-              </div>
-            </div>
-            <div className="text-secondary/30 font-body text-lg">—</div>
-            <div className="text-center">
-              <div className="text-[10px] tracking-widest text-secondary">{opponentName || 'OPPONENT'}</div>
-              <div className={`text-3xl font-bold ${playerRole === 'p1' ? 'text-primary-fixed' : 'text-primary'}`}>
-                {playerRole === 'p1' ? p2Score : p1Score}
-              </div>
-            </div>
-          </div>
-
-          {/* Turn indicator */}
-          <div className="font-label text-[10px] tracking-widest uppercase">
-            {isFinished ? (
-              <span className="text-primary-fixed">GAME_COMPLETE</span>
-            ) : isMyTurn ? (
-              <span className="text-primary-fixed animate-pulse">YOUR_TURN ▸</span>
-            ) : (
-              <span className="text-secondary/60">OPPONENT_CALCULATING...</span>
-            )}
-          </div>
-
-          {/* Game board */}
-          {gameState && (
-            <GameBoard
-              gameState={gameState}
-              onLineClick={handleLineClick}
-              isMyTurn={isMyTurn && !isFinished}
+        {/* 3-column board layout */}
+        <div className="flex items-center gap-4 px-4">
+          {/* Left PlayerCard — me */}
+          <div className="w-44 shrink-0">
+            <PlayerCard
+              name={myName}
+              score={myScore}
+              role={myRole}
+              isActive={myIsActive}
+              isMe={true}
             />
-          )}
+          </div>
 
-          {!gameState && (
-            <div className="font-label text-[10px] tracking-widest text-secondary/40 animate-pulse">
-              ESTABLISHING_GRID_CONNECTION...
+          {/* Center — board + turn indicator */}
+          <div className="flex flex-col items-center gap-4">
+            {/* Turn indicator */}
+            <div className="font-label text-[10px] tracking-widest uppercase">
+              {isFinished ? (
+                <span className="text-primary-fixed">GAME_COMPLETE</span>
+              ) : isMyTurn ? (
+                <span className="text-primary-fixed animate-pulse">YOUR_TURN ▸</span>
+              ) : (
+                <span className="text-secondary/60">OPPONENT_CALCULATING...</span>
+              )}
             </div>
-          )}
+
+            {/* Game board */}
+            {gameState && (
+              <GameBoard
+                gameState={gameState}
+                onLineClick={handleLineClick}
+                isMyTurn={isMyTurn && !isFinished}
+              />
+            )}
+
+            {!gameState && (
+              <div className="font-label text-[10px] tracking-widest text-secondary/40 animate-pulse">
+                ESTABLISHING_GRID_CONNECTION...
+              </div>
+            )}
+
+            {/* Mobile score fallback (visible on small screens where PlayerCards may be tight) */}
+            <div className="flex md:hidden items-center gap-6 font-headline mt-2">
+              <div className="text-center">
+                <div className="text-[9px] tracking-widest text-secondary truncate max-w-[80px]">{myName}</div>
+                <div className="text-2xl font-bold text-primary">{myScore}</div>
+              </div>
+              <div className="text-secondary/30">—</div>
+              <div className="text-center">
+                <div className="text-[9px] tracking-widest text-secondary truncate max-w-[80px]">{opponentName || 'OPPONENT'}</div>
+                <div className="text-2xl font-bold text-primary-fixed">{oppScore}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right PlayerCard — opponent */}
+          <div className="w-44 shrink-0">
+            <PlayerCard
+              name={opponentName || 'OPPONENT'}
+              score={oppScore}
+              role={oppRole}
+              isActive={oppIsActive}
+              isMe={false}
+            />
+          </div>
         </div>
 
         {/* Opponent disconnected overlay */}
