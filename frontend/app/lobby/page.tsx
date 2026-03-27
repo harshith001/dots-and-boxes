@@ -14,9 +14,10 @@ export default function LobbyPage() {
   const [status, setStatus] = useState<'idle' | 'searching'>('idle');
 
   useEffect(() => {
-    const name = sessionStorage.getItem('operatorName') ?? 'OPERATOR';
+    const name = sessionStorage.getItem('operatorName');
+    if (!name) { router.replace('/'); return; }
     setOperatorNameLocal(name);
-  }, []);
+  }, [router]);
 
   function handleQuickMatch() {
     setStatus('searching');

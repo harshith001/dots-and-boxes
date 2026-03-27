@@ -77,10 +77,10 @@ export default function SetupScreen() {
           <div className="bg-surface-container-high/40 backdrop-blur-xl border border-outline-variant/10 p-10 shadow-2xl">
             <div className="mb-12">
               <h1 className="font-headline text-3xl font-bold text-primary tracking-tighter mb-2">
-                INITIALIZE_OPERATOR
+                {redirect ? 'JOIN_SESSION' : 'INITIALIZE_OPERATOR'}
               </h1>
               <p className="font-label text-[10px] uppercase tracking-widest text-secondary/60">
-                ESTABLISHING ENCRYPTED CONNECTION TO GRID_SERVER_01
+                {redirect ? 'ENTER YOUR OPERATOR ID TO JOIN THE MATCH' : 'ESTABLISHING ENCRYPTED CONNECTION TO GRID_SERVER_01'}
               </p>
             </div>
 
@@ -88,7 +88,7 @@ export default function SetupScreen() {
               {/* Name input */}
               <div className="space-y-3">
                 <label className="font-label text-[10px] uppercase tracking-widest text-primary-fixed block">
-                  INITIALIZING_OPERATOR_NAME
+                  OPERATOR_NAME
                 </label>
                 <div className="relative group">
                   <input
@@ -106,32 +106,34 @@ export default function SetupScreen() {
                 </div>
               </div>
 
-              {/* Grid size selector */}
-              <div className="space-y-3">
-                <label className="font-label text-[10px] uppercase tracking-widest text-primary-fixed block">
-                  GRID_DIMENSIONS
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {GRID_OPTIONS.map(({ dots, label, mode }) => {
-                    const active = gridSize === dots;
-                    return (
-                      <button
-                        key={dots}
-                        type="button"
-                        onClick={() => setGridSize(dots)}
-                        className={`flex flex-col items-start p-3 border transition-all duration-150 ${
-                          active
-                            ? 'border-primary-fixed bg-primary-fixed/5 text-primary-fixed'
-                            : 'border-outline-variant/10 text-secondary hover:border-primary-fixed/50'
-                        }`}
-                      >
-                        <span className="font-headline text-sm font-bold tracking-tight">{label}</span>
-                        <span className="font-label text-[9px] uppercase tracking-widest opacity-60 mt-0.5">{mode}</span>
-                      </button>
-                    );
-                  })}
+              {/* Grid size selector — hidden for invitees joining an existing room */}
+              {!redirect && (
+                <div className="space-y-3">
+                  <label className="font-label text-[10px] uppercase tracking-widest text-primary-fixed block">
+                    GRID_DIMENSIONS
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {GRID_OPTIONS.map(({ dots, label, mode }) => {
+                      const active = gridSize === dots;
+                      return (
+                        <button
+                          key={dots}
+                          type="button"
+                          onClick={() => setGridSize(dots)}
+                          className={`flex flex-col items-start p-3 border transition-all duration-150 ${
+                            active
+                              ? 'border-primary-fixed bg-primary-fixed/5 text-primary-fixed'
+                              : 'border-outline-variant/10 text-secondary hover:border-primary-fixed/50'
+                          }`}
+                        >
+                          <span className="font-headline text-sm font-bold tracking-tight">{label}</span>
+                          <span className="font-label text-[9px] uppercase tracking-widest opacity-60 mt-0.5">{mode}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* CTA */}
               <div className="pt-6 space-y-4">
@@ -140,7 +142,7 @@ export default function SetupScreen() {
                   disabled={!name.trim()}
                   className="w-full h-16 bg-primary-fixed text-on-primary-fixed font-headline font-bold uppercase tracking-widest flex items-center justify-center gap-3 hover:shadow-[0_0_20px_rgba(204,255,0,0.2)] transition-all duration-300 active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  DEPLOY_INITIAL_SEQUENCE
+                  {redirect ? 'JOIN_MATCH' : 'DEPLOY_INITIAL_SEQUENCE'}
                   <span className="material-symbols-outlined">double_arrow</span>
                 </button>
                 <div className="flex items-center justify-between px-2">
