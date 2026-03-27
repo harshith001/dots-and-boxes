@@ -19,7 +19,6 @@ interface GameBoardProps {
   isMyTurn?: boolean;
 }
 
-const GRID_SIZE = 5;
 // KINETIC_GRID colors
 const P1_COLOR   = '#ffffff';           // Player 1 = white
 const P2_COLOR   = '#c3f400';           // Player 2 = electric lime
@@ -39,7 +38,8 @@ function playerBoxFill(p: Player) {
 
 export function GameBoard({ gameState, onMove, disabled = false, onLineClick, isMyTurn }: GameBoardProps) {
   const [hoveredLine, setHoveredLine] = useState<string | null>(null);
-  const { width, height } = gridToViewBox(GRID_SIZE);
+  const dotRows = gameState.hLines.length;
+  const { width, height } = gridToViewBox(dotRows);
   const hoverColor = playerColor(gameState.currentTurn);
 
   // Track which lines and boxes were already present — used to detect newly drawn/claimed
@@ -219,8 +219,8 @@ export function GameBoard({ gameState, onMove, disabled = false, onLineClick, is
             )
           )}
 
-          {Array.from({ length: GRID_SIZE }, (_, r) =>
-            Array.from({ length: GRID_SIZE }, (_, c) => {
+          {Array.from({ length: dotRows }, (_, r) =>
+            Array.from({ length: dotRows }, (_, c) => {
               const { cx, cy } = dotPosition(r, c);
               return (
                 <circle key={`dot-${r}-${c}`} cx={cx} cy={cy} r={7} fill={DOT_COLOR} filter="url(#dot-glow)" />

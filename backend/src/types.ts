@@ -16,6 +16,7 @@ export interface LocalGameState {
   currentTurn: Player;
   status: 'active' | 'finished';
   winner: Player | 'draw' | null;
+  gridSize: number;
 }
 
 // --- Multiplayer Types ---
@@ -43,12 +44,14 @@ export interface Room {
 export interface CreateRoomPayload {
   playerToken: string;
   playerName: string;
+  gridSize?: number;
 }
 
 export interface JoinRoomPayload {
   roomId: string;
   playerToken: string;
   playerName: string;
+  gridSize?: number;
 }
 
 export interface MakeMovePayload {

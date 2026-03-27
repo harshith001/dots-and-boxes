@@ -4,8 +4,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSession, postSession } from '../lib/api';
 
+const GRID_OPTIONS = [
+  { dots: 5, label: '5×5', mode: 'TACTICAL_FAST' },
+  { dots: 9, label: '9×9', mode: 'STANDARD_ENGAGE' },
+  { dots: 13, label: '13×13', mode: 'GRID_WAR' },
+] as const;
+
 export default function SetupScreen() {
   const [name, setName] = useState('');
+  const [gridSize, setGridSize] = useState(5);
   const router = useRouter();
 
   useEffect(() => {
@@ -21,6 +28,7 @@ export default function SetupScreen() {
     const operatorName = name.trim().toUpperCase().slice(0, 24);
     await postSession(operatorName).catch(() => null);
     sessionStorage.setItem('operatorName', operatorName);
+    sessionStorage.setItem('gridSize', String(gridSize));
     router.push('/lobby');
   }
 
@@ -93,6 +101,33 @@ export default function SetupScreen() {
                   <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2">
                     <span className="w-1 h-4 bg-primary-fixed animate-pulse" />
                   </div>
+                </div>
+              </div>
+
+              {/* Grid size selector */}
+              <div className="space-y-3">
+                <label className="font-label text-[10px] uppercase tracking-widest text-primary-fixed block">
+                  GRID_DIMENSIONS
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {GRID_OPTIONS.map(({ dots, label, mode }) => {
+                    const active = gridSize === dots;
+                    return (
+                      <button
+                        key={dots}
+                        type="button"
+                        onClick={() => setGridSize(dots)}
+                        className={`flex flex-col items-start p-3 border transition-all duration-150 ${
+                          active
+                            ? 'border-primary-fixed bg-primary-fixed/5 text-primary-fixed'
+                            : 'border-outline-variant/10 text-secondary hover:border-primary-fixed/50'
+                        }`}
+                      >
+                        <span className="font-headline text-sm font-bold tracking-tight">{label}</span>
+                        <span className="font-label text-[9px] uppercase tracking-widest opacity-60 mt-0.5">{mode}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

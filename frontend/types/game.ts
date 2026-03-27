@@ -10,13 +10,14 @@ export interface Move {
 }
 
 export interface LocalGameState {
-  hLines: boolean[][];      // 5 rows x 4 cols for 5x5 grid
-  vLines: boolean[][];      // 4 rows x 5 cols for 5x5 grid
-  boxes: (Player | null)[][]; // 4 rows x 4 cols
+  hLines: boolean[][];      // gridSize rows x (gridSize-1) cols
+  vLines: boolean[][];      // (gridSize-1) rows x gridSize cols
+  boxes: (Player | null)[][]; // (gridSize-1) rows x (gridSize-1) cols
   scores: { p1: number; p2: number };
   currentTurn: Player;
   status: 'active' | 'finished';
   winner: Player | 'draw' | null;
+  gridSize: number;
 }
 
 // --- Multiplayer Types ---
@@ -44,12 +45,14 @@ export interface Room {
 export interface CreateRoomPayload {
   playerToken: string;
   playerName: string;
+  gridSize?: number;
 }
 
 export interface JoinRoomPayload {
   roomId: string;
   playerToken: string;
   playerName: string;
+  gridSize?: number;
 }
 
 export interface MakeMovePayload {

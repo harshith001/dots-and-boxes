@@ -22,10 +22,11 @@ export default function LobbyPage() {
     setStatus('searching');
     const token = getOrCreatePlayerToken();
     const name = sessionStorage.getItem('operatorName') ?? 'OPERATOR';
+    const gridSize = parseInt(sessionStorage.getItem('gridSize') ?? '5');
     const socket = connectSocket();
     setConnectionStatus('connecting');
 
-    socket.emit('queue:join', { playerToken: token, playerName: name });
+    socket.emit('queue:join', { playerToken: token, playerName: name, gridSize });
 
     socket.once('queue:matched', ({ roomId, playerRole }: { roomId: string; playerRole: 'p1' | 'p2' }) => {
       setRoomId(roomId);
@@ -38,10 +39,11 @@ export default function LobbyPage() {
   function handleCreateSession() {
     const token = getOrCreatePlayerToken();
     const name = sessionStorage.getItem('operatorName') ?? 'OPERATOR';
+    const gridSize = parseInt(sessionStorage.getItem('gridSize') ?? '5');
     const socket = connectSocket();
     setConnectionStatus('connecting');
 
-    socket.emit('room:create', { playerToken: token, playerName: name });
+    socket.emit('room:create', { playerToken: token, playerName: name, gridSize });
 
     socket.once('room:created', ({ roomId, playerRole }: { roomId: string; playerRole: 'p1' | 'p2' }) => {
       setRoomId(roomId);

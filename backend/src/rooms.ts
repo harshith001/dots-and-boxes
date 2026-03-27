@@ -5,7 +5,7 @@ import { applyMove, createInitialState } from './gameEngine.js';
 export class RoomManager {
   private rooms = new Map<string, Room>();
 
-  createRoom(playerToken: string, playerName: string): Room {
+  createRoom(playerToken: string, playerName: string, gridSize = 5): Room {
     const roomId = uuidv4().slice(0, 8).toUpperCase();
     const player: RoomPlayer = {
       playerToken,
@@ -18,7 +18,7 @@ export class RoomManager {
       id: roomId,
       status: 'waiting',
       players: [player],
-      gameState: createInitialState(),
+      gameState: createInitialState(gridSize),
       createdAt: Date.now(),
     };
     this.rooms.set(roomId, room);

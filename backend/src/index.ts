@@ -137,8 +137,8 @@ io.on('connection', (socket) => {
   console.log('[socket] connected', socket.id);
 
   // Create private room
-  socket.on('room:create', ({ playerToken, playerName }: CreateRoomPayload) => {
-    const room = roomManager.createRoom(playerToken, playerName);
+  socket.on('room:create', ({ playerToken, playerName, gridSize }: CreateRoomPayload) => {
+    const room = roomManager.createRoom(playerToken, playerName, gridSize ?? 5);
     roomManager.setSocketId(playerToken, socket.id);
     socket.join(room.id);
 
@@ -170,7 +170,7 @@ io.on('connection', (socket) => {
   });
 
   // Quick match: add to queue or pair with waiting player
-  socket.on('queue:join', ({ playerToken, playerName }: CreateRoomPayload) => {
+  socket.on('queue:join', ({ playerToken, playerName, gridSize }: CreateRoomPayload) => {
     // Remove stale entry for same token
     queue.delete(playerToken);
 
@@ -179,7 +179,7 @@ io.on('connection', (socket) => {
     if (opponentToken) {
       queue.delete(opponentToken);
       // Create room, join both
-      const room = roomManager.createRoom(opponentToken, opponentInfo.name);
+      const room = roomManager.createRoom(opponentToken, opponentInfo.name, gridSize ?? 5);
       roomManager.setSocketId(opponentToken, opponentInfo.socketId);
 
       const opponentSocket = io.sockets.sockets.get(opponentInfo.socketId);
@@ -201,7 +201,7 @@ io.on('connection', (socket) => {
       setTimeout(() => {
         if (!queue.has(playerToken)) return; // already matched
         queue.delete(playerToken);
-        const room = roomManager.createRoom(playerToken, playerName);
+        const room = roomManager.createRoom(playerToken, playerName, gridSize ?? 5);
         roomManager.setSocketId(playerToken, socket.id);
         socket.join(room.id);
         socket.emit('queue:matched', { roomId: room.id, playerRole: 'p1' });

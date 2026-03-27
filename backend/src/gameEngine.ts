@@ -1,14 +1,15 @@
 import type { LocalGameState, Move, Player } from './types.js';
 
-export function createInitialState(): LocalGameState {
+export function createInitialState(gridSize = 5): LocalGameState {
   return {
-    hLines: Array.from({ length: 5 }, () => Array(4).fill(false)),
-    vLines: Array.from({ length: 4 }, () => Array(5).fill(false)),
-    boxes: Array.from({ length: 4 }, () => Array(4).fill(null)),
+    hLines: Array.from({ length: gridSize }, () => Array(gridSize - 1).fill(false)),
+    vLines: Array.from({ length: gridSize - 1 }, () => Array(gridSize).fill(false)),
+    boxes: Array.from({ length: gridSize - 1 }, () => Array(gridSize - 1).fill(null)),
     scores: { p1: 0, p2: 0 },
     currentTurn: 'p1',
     status: 'active',
     winner: null,
+    gridSize,
   };
 }
 
@@ -18,8 +19,10 @@ function findCompletedBoxes(
   existingBoxes: (Player | null)[][]
 ): Array<{ row: number; col: number }> {
   const completed: Array<{ row: number; col: number }> = [];
-  for (let r = 0; r < 4; r++) {
-    for (let c = 0; c < 4; c++) {
+  const boxRows = existingBoxes.length;
+  const boxCols = existingBoxes[0]?.length ?? 0;
+  for (let r = 0; r < boxRows; r++) {
+    for (let c = 0; c < boxCols; c++) {
       if (
         existingBoxes[r][c] === null &&
         hLines[r][c] &&
@@ -76,7 +79,8 @@ export function applyMove(state: LocalGameState, move: Move, _player: Player): L
   let newStatus: 'active' | 'finished' = 'active';
   let newWinner: Player | 'draw' | null = null;
 
-  if (totalFilled === 16) {
+  const totalBoxes = newBoxes.length * (newBoxes[0]?.length ?? 0);
+  if (totalFilled === totalBoxes) {
     newStatus = 'finished';
     if (p1Count > p2Count) newWinner = 'p1';
     else if (p2Count > p1Count) newWinner = 'p2';
@@ -99,5 +103,6 @@ export function applyMove(state: LocalGameState, move: Move, _player: Player): L
     currentTurn: newTurn,
     status: newStatus,
     winner: newWinner,
+    gridSize: state.gridSize,
   };
 }

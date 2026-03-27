@@ -26,10 +26,12 @@ interface MultiplayerState {
 
 interface GameStore extends MultiplayerState {
   gameState: LocalGameState | null;
+  gridSize: number;
   // Local game actions
-  startGame: () => void;
+  startGame: (gridSize?: number) => void;
   makeMove: (move: Move) => void;
   resetGame: () => void;
+  setGridSize: (gridSize: number) => void;
   // Multiplayer actions
   setRoomId: (roomId: string | null) => void;
   setPlayerRole: (role: 'p1' | 'p2' | null) => void;
@@ -43,13 +45,16 @@ interface GameStore extends MultiplayerState {
 export const useGameStore = create<GameStore>((set) => ({
   // Local game state
   gameState: null,
-  startGame: () => set({ gameState: initGameState() }),
+  gridSize: 5,
+  startGame: (gridSize) =>
+    set((s) => ({ gameState: initGameState(gridSize ?? s.gridSize) })),
   makeMove: (move) =>
     set((s) => {
       if (!s.gameState || s.gameState.status !== 'active') return s;
       return { gameState: applyMoveLogic(s.gameState, move) };
     }),
   resetGame: () => set({ gameState: null }),
+  setGridSize: (gridSize) => set({ gridSize }),
 
   // Multiplayer state — initial values
   roomId: null,
