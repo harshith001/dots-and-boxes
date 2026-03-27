@@ -23,7 +23,7 @@ interface GameBoardProps {
 const P1_COLOR = '#ffffff';     // Player 1 = white
 const P2_COLOR = '#c3f400';     // Player 2 = electric lime
 const LINE_IDLE = '#2a2a2a';
-const DOT_COLOR = '#555555';
+const DOT_COLOR = '#3a3a3a';
 
 function playerColor(p: Player) {
   return p === 'p1' ? P1_COLOR : P2_COLOR;
@@ -222,7 +222,7 @@ export function GameBoard({ gameState, onMove, disabled = false, onLineClick, is
             Array.from({ length: dotRows }, (_, c) => {
               const { cx, cy } = dotPosition(r, c);
               return (
-                <circle key={`dot-${r}-${c}`} cx={cx} cy={cy} r={7} fill={DOT_COLOR} filter="url(#dot-glow)" />
+                <rect key={`dot-${r}-${c}`} x={cx - 2} y={cy - 2} width={4} height={4} fill={DOT_COLOR} />
               );
             })
           )}
