@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-multiplayer-core/02-01-PLAN.md
-last_updated: "2026-03-27T04:36:37.398Z"
+stopped_at: Completed 02-multiplayer-core/02-02-PLAN.md
+last_updated: "2026-03-27T05:26:27.192Z"
 last_activity: 2026-03-27
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
   percent: 0
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 ## Current Position
 
 Phase: 02 (multiplayer-core) — READY TO EXECUTE
-Plan: 1 of 3
+Plan: 2 of 3
 Status: Ready to execute
 Last activity: 2026-03-27
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01-foundation-game-engine P02 | 4 | 2 tasks | 5 files |
 | Phase 01-foundation-game-engine P03 | 8 | 2 tasks | 5 files |
 | Phase 02-multiplayer-core P01 | 5 | 3 tasks | 3 files |
+| Phase 02 P02 | 15 | 5 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,8 @@ Recent decisions affecting current work:
 - [Phase 01-foundation-game-engine]: useEffect null guard in game page prevents double startGame() in React 19 StrictMode
 - [Phase 02-multiplayer-core]: Tailwind v4 @theme CSS config instead of tailwind.config.ts — project uses Tailwind v4 (no JS config file)
 - [Phase 02-multiplayer-core]: operatorName stored in sessionStorage on setup screen; navigates to /lobby on DEPLOY
+- [Phase 02]: Bot fills empty slot after 5s timeout in both room:create and queue:join paths
+- [Phase 02]: Socket singleton uses autoConnect:false — connects on demand in lobby actions
 
 ### Pending Todos
 
@@ -89,6 +92,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T04:36:37.394Z
-Stopped at: Completed 02-multiplayer-core/02-01-PLAN.md
+Last session: 2026-03-27T05:26:27.190Z
+Stopped at: Completed 02-multiplayer-core/02-02-PLAN.md
 Resume file: None

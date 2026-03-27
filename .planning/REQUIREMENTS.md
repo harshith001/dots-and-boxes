@@ -19,13 +19,13 @@
 ### Multiplayer
 
 - [x] **MULTI-01**: Player can enter a username and start a quick match session
-- [ ] **MULTI-02**: Quick match places player in a matchmaking queue
-- [ ] **MULTI-03**: If no opponent found within 5 seconds, a bot opponent is assigned
+- [x] **MULTI-02**: Quick match places player in a matchmaking queue
+- [x] **MULTI-03**: If no opponent found within 5 seconds, a bot opponent is assigned
 - [ ] **MULTI-04**: Player can create a private room and receive a shareable invite link
 - [ ] **MULTI-05**: Second player can join a private room via the invite link
-- [ ] **MULTI-06**: Both players receive real-time game state updates via Socket.io
-- [ ] **MULTI-07**: Player reconnection is handled via persistent player token (not socket.id)
-- [ ] **MULTI-08**: Opponent disconnect is surfaced to the remaining player
+- [x] **MULTI-06**: Both players receive real-time game state updates via Socket.io
+- [x] **MULTI-07**: Player reconnection is handled via persistent player token (not socket.id)
+- [x] **MULTI-08**: Opponent disconnect is surfaced to the remaining player
 
 ### UI / UX
 
@@ -126,13 +126,13 @@
 | INFRA-05 | Phase 1 | Complete |
 | INFRA-06 | Phase 1 | Complete |
 | MULTI-01 | Phase 2 | Complete |
-| MULTI-02 | Phase 2 | Pending |
-| MULTI-03 | Phase 2 | Pending |
+| MULTI-02 | Phase 2 | Complete |
+| MULTI-03 | Phase 2 | Complete |
 | MULTI-04 | Phase 2 | Pending |
 | MULTI-05 | Phase 2 | Pending |
-| MULTI-06 | Phase 2 | Pending |
-| MULTI-07 | Phase 2 | Pending |
-| MULTI-08 | Phase 2 | Pending |
+| MULTI-06 | Phase 2 | Complete |
+| MULTI-07 | Phase 2 | Complete |
+| MULTI-08 | Phase 2 | Complete |
 | UI-01 | Phase 3 | Pending |
 | UI-02 | Phase 3 | Pending |
 | UI-03 | Phase 3 | Pending |
