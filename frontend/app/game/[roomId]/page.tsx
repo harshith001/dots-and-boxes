@@ -6,7 +6,15 @@ import { connectSocket, getSocket } from '@/lib/socket';
 import { useGameStore, getOrCreatePlayerToken } from '@/store/gameStore';
 import GameBoard from '@/components/game/GameBoard';
 import { PlayerCard } from '@/components/game/PlayerCard';
-import type { GameStateEvent, Move } from '@/types/game';
+import { EmojiPanel } from '@/components/game/EmojiPanel';
+import { ChatPanel } from '@/components/game/ChatPanel';
+import type { GameStateEvent, Move, EmojiReaction, EmojiReceivedEvent, ChatReceivedEvent } from '@/types/game';
+
+interface FloatingEmoji {
+  id: number;
+  emoji: EmojiReaction;
+  x: number; // percent 10–80
+}
 
 export default function MultiplayerGamePage() {
   const router = useRouter();
@@ -21,7 +29,10 @@ export default function MultiplayerGamePage() {
 
   const [opponentName, setOpponentName] = useState<string>('');
   const [log, setLog] = useState<string[]>(['[SYSTEM] CONNECTION ESTABLISHED.']);
+  const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
+  const [chatLog, setChatLog] = useState<ChatReceivedEvent[]>([]);
   const logRef = useRef<HTMLDivElement>(null);
+  const emojiIdCounter = useRef(0);
 
   const myName = typeof window !== 'undefined'
     ? sessionStorage.getItem('operatorName') ?? 'OP_01'
@@ -49,17 +60,34 @@ export default function MultiplayerGamePage() {
       setLog(prev => [...prev, '[WARN] OPPONENT_DISCONNECTED.']);
     }
 
+    function onEmojiReceived(event: EmojiReceivedEvent) {
+      const id = ++emojiIdCounter.current;
+      const x = Math.floor(Math.random() * 70) + 10; // 10–80%
+      setFloatingEmojis(prev => [...prev, { id, emoji: event.emoji, x }]);
+      setTimeout(() => {
+        setFloatingEmojis(prev => prev.filter(e => e.id !== id));
+      }, 1900);
+    }
+
+    function onChatReceived(event: ChatReceivedEvent) {
+      setChatLog(prev => [...prev, event]);
+    }
+
     socket.on('game:state', onGameState);
     socket.on('opponent:disconnected', onOpponentDisconnected);
+    socket.on('emoji:received', onEmojiReceived);
+    socket.on('chat:received', onChatReceived);
 
     return () => {
       socket.off('game:state', onGameState);
       socket.off('opponent:disconnected', onOpponentDisconnected);
+      socket.off('emoji:received', onEmojiReceived);
+      socket.off('chat:received', onChatReceived);
       socket.emit('room:leave', { roomId, playerToken: token });
     };
   }, [roomId, applyServerState, setOpponentDisconnected]);
 
-  // Scroll log to bottom
+  // Scroll telemetry log to bottom
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [log]);
@@ -69,12 +97,21 @@ export default function MultiplayerGamePage() {
     getSocket().emit('room:move', { roomId, playerToken: token, move });
   }
 
+  function handleEmojiSend(emoji: EmojiReaction) {
+    const token = getOrCreatePlayerToken();
+    getSocket().emit('emoji:send', { roomId, playerToken: token, emoji });
+  }
+
+  function handleChatSend(message: string) {
+    const token = getOrCreatePlayerToken();
+    getSocket().emit('chat:send', { roomId, playerToken: token, message });
+  }
+
   const isMyTurn = gameState?.currentTurn === playerRole;
   const p1Score = gameState?.scores.p1 ?? 0;
   const p2Score = gameState?.scores.p2 ?? 0;
   const isFinished = gameState?.status === 'finished';
 
-  // Derive names and roles for each side
   const myRole = playerRole ?? 'p1';
   const oppRole = myRole === 'p1' ? 'p2' : 'p1';
   const myScore = myRole === 'p1' ? p1Score : p2Score;
@@ -169,7 +206,7 @@ export default function MultiplayerGamePage() {
             />
           </div>
 
-          {/* Center — board + turn indicator */}
+          {/* Center — board + turn indicator + social */}
           <div className="flex flex-col items-center gap-4">
             {/* Turn indicator */}
             <div className="font-label text-[10px] tracking-widest uppercase">
@@ -182,13 +219,24 @@ export default function MultiplayerGamePage() {
               )}
             </div>
 
-            {/* Game board */}
+            {/* Game board with floating emojis */}
             {gameState && (
-              <GameBoard
-                gameState={gameState}
-                onLineClick={handleLineClick}
-                isMyTurn={isMyTurn && !isFinished}
-              />
+              <div className="relative">
+                <GameBoard
+                  gameState={gameState}
+                  onLineClick={handleLineClick}
+                  isMyTurn={isMyTurn && !isFinished}
+                />
+                {floatingEmojis.map(fe => (
+                  <span
+                    key={fe.id}
+                    className="animate-emoji-float"
+                    style={{ left: `${fe.x}%`, bottom: '20%' }}
+                  >
+                    {fe.emoji}
+                  </span>
+                ))}
+              </div>
             )}
 
             {!gameState && (
@@ -197,7 +245,18 @@ export default function MultiplayerGamePage() {
               </div>
             )}
 
-            {/* Mobile score fallback (visible on small screens where PlayerCards may be tight) */}
+            {/* Social panels */}
+            <div className="flex flex-col items-center gap-3 w-full max-w-sm">
+              <EmojiPanel onSend={handleEmojiSend} />
+              <ChatPanel
+                onSend={handleChatSend}
+                log={chatLog}
+                myRole={myRole}
+                myName={myName}
+              />
+            </div>
+
+            {/* Mobile score fallback */}
             <div className="flex md:hidden items-center gap-6 font-headline mt-2">
               <div className="text-center">
                 <div className="text-[9px] tracking-widest text-secondary truncate max-w-[80px]">{myName}</div>
