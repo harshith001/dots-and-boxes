@@ -373,32 +373,83 @@ export default function MultiplayerGamePage() {
 
       {/* Game end overlay */}
       {isFinished && !opponentDisconnected && (
-        <div className="fixed inset-0 bg-[#0a0a0a]/80 backdrop-blur-xl z-50 flex items-center justify-center">
-          <div className="relative bg-[#111111] border border-[#222222] p-12 max-w-md w-full text-center space-y-8">
-            <div className="absolute top-0 left-0 w-8 h-px bg-[#c3f400]" />
-            <div className="absolute top-0 left-0 w-px h-8 bg-[#c3f400]" />
-            <h2 className="font-headline text-3xl font-bold tracking-tighter">
-              {gameState.winner === null
-                ? 'DRAW_DETECTED'
-                : gameState.winner === playerRole
-                  ? 'VICTORY_CONFIRMED'
-                  : 'DEFEAT_LOGGED'}
-            </h2>
-            <div className="font-label text-[10px] tracking-widest text-[#555555]">
-              FINAL_SCORE: {p1Score} — {p2Score}
+        <div className="fixed inset-0 bg-[#0a0a0a]/90 backdrop-blur-xl z-50 flex items-center justify-center">
+          <div className="relative bg-[#111111] border border-[#1e1e1e] w-full max-w-sm mx-4">
+            {/* Lime top accent */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[#c3f400]" />
+
+            {/* Result */}
+            <div className="px-8 pt-10 pb-6 text-center border-b border-[#1e1e1e]">
+              <p className="font-label text-[9px] uppercase tracking-widest text-[#555555] mb-3">
+                {gameState.winner === null ? 'MATCH_RESULT' : gameState.winner === playerRole ? 'MATCH_RESULT' : 'MATCH_RESULT'}
+              </p>
+              <h2
+                className="font-headline text-4xl font-black tracking-tighter"
+                style={{
+                  color: gameState.winner === null
+                    ? '#888888'
+                    : gameState.winner === playerRole
+                      ? '#c3f400'
+                      : '#ffffff',
+                }}
+              >
+                {gameState.winner === null
+                  ? 'DRAW'
+                  : gameState.winner === playerRole
+                    ? 'VICTORY'
+                    : 'DEFEAT'}
+              </h2>
             </div>
-            <div className="flex gap-4 justify-center">
+
+            {/* Scores */}
+            <div className="grid grid-cols-2 divide-x divide-[#1e1e1e] border-b border-[#1e1e1e]">
+              <div className="px-6 py-5 flex flex-col items-center gap-1">
+                <span className="font-label text-[8px] uppercase tracking-widest text-[#555555]">YOU</span>
+                <span
+                  className="font-headline text-5xl font-black tabular-nums"
+                  style={{ color: myAccent }}
+                >
+                  {myScore}
+                </span>
+                <span className="font-label text-[8px] text-[#333333] truncate max-w-full px-1">{myName}</span>
+              </div>
+              <div className="px-6 py-5 flex flex-col items-center gap-1">
+                <span className="font-label text-[8px] uppercase tracking-widest text-[#555555]">OPPONENT</span>
+                <span
+                  className="font-headline text-5xl font-black tabular-nums"
+                  style={{ color: oppAccent }}
+                >
+                  {oppScore}
+                </span>
+                <span className="font-label text-[8px] text-[#333333] truncate max-w-full px-1">{opponentName || '—'}</span>
+              </div>
+            </div>
+
+            {/* Meta */}
+            <div className="px-8 py-3 border-b border-[#1e1e1e] flex items-center justify-between">
+              <span className="font-label text-[8px] uppercase tracking-widest text-[#333333]">GRID_SCALE</span>
+              <span className="font-label text-[9px] font-bold text-[#555555]">{gridLabel}</span>
+            </div>
+
+            {/* Actions */}
+            <div className="p-4 flex gap-3">
               <button
                 onClick={() => router.push('/lobby')}
-                className="px-8 py-4 bg-[#c3f400] text-black font-headline font-bold tracking-widest hover:shadow-[0_0_20px_rgba(195,244,0,0.2)] transition-all"
+                className="flex-1 h-11 bg-[#c3f400] text-black font-label text-[9px] font-bold uppercase tracking-widest hover:bg-[#abd600] transition-colors"
               >
-                PLAY_AGAIN
+                PLAY AGAIN
+              </button>
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="flex-1 h-11 border border-[#2a2a2a] text-[#555555] font-label text-[9px] font-bold uppercase tracking-widest hover:text-white hover:border-[#444] transition-colors"
+              >
+                DASHBOARD
               </button>
               <button
                 onClick={() => router.push('/')}
-                className="px-8 py-4 border border-[#222222] text-[#555555] font-headline font-bold tracking-widest hover:text-white transition-colors"
+                className="h-11 px-4 border border-[#1e1e1e] text-[#333333] font-label text-[9px] font-bold uppercase tracking-widest hover:text-[#555] transition-colors"
               >
-                EXIT_GRID
+                EXIT
               </button>
             </div>
           </div>

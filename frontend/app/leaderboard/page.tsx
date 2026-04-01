@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation';
 import { getLeaderboard } from '../../lib/api';
 import type { LeaderboardEntry } from '../../lib/api';
 
-function SideNav({ active }: { active: 'dashboard' | 'leaderboard' | 'lobby' }) {
+function SideNav({ active }: { active: 'dashboard' | 'leaderboard' | 'lobby' | 'settings' }) {
   const router = useRouter();
   const links = [
     { key: 'lobby', label: 'GRID', icon: 'grid_view', href: '/lobby' },
     { key: 'leaderboard', label: 'LB', icon: 'leaderboard', href: '/leaderboard' },
     { key: 'dashboard', label: 'DASH', icon: 'bar_chart', href: '/dashboard' },
+    { key: 'settings', label: 'CFG', icon: 'settings', href: '/settings' },
   ] as const;
   return (
     <nav className="fixed left-0 top-14 bottom-0 w-16 bg-surface-container-low border-r border-outline-variant/10 flex flex-col items-center pt-6 gap-6 z-40">
