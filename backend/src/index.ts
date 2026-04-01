@@ -5,7 +5,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { roomManager } from './rooms.js';
 import { pickBotMove } from './bot.js';
-import { recordMatch, getPlayerStats, getMatchHistory, getLeaderboard, upsertPlayer } from './db.js';
+import { recordMatch, getPlayerStats, getMatchHistory, getExtendedStats, getLeaderboard, upsertPlayer } from './db.js';
 import type {
   CreateRoomPayload, JoinRoomPayload, MakeMovePayload, LeaveRoomPayload,
   EmojiSendPayload, ChatSendPayload
@@ -61,7 +61,8 @@ app.get('/api/stats/:username', (req, res) => {
   }
   const stats = getPlayerStats(username);
   const history = getMatchHistory(username);
-  res.json({ stats, history });
+  const extended = getExtendedStats(username);
+  res.json({ stats, history, extended });
 });
 
 app.get('/api/leaderboard', (_req, res) => {
@@ -108,7 +109,7 @@ function emitGameState(roomId: string): void {
         // Ensure both players exist in DB
         upsertPlayer(p1.name);
         upsertPlayer(p2.name);
-        recordMatch(room.id, p1.name, p2.name, winner, scoreP1, scoreP2);
+        recordMatch(room.id, p1.name, p2.name, winner, scoreP1, scoreP2, room.gameState.gridSize);
       }
     }
   }

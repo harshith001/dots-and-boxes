@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSession, deleteSession } from '../../lib/api';
+import { SideNav } from '../../components/SideNav';
 
 const GRID_OPTIONS = [
   { value: 5, label: '5×5', sub: 'TACTICAL' },
@@ -50,23 +51,7 @@ export default function SettingsPage() {
         </button>
       </header>
 
-      <nav className="fixed left-0 top-14 bottom-0 w-16 bg-surface-container-lowest border-r border-outline-variant/10 flex flex-col items-center pt-6 gap-6 z-40">
-        {[
-          { icon: 'grid_view', label: 'GRID', href: '/lobby' },
-          { icon: 'leaderboard', label: 'LB', href: '/leaderboard' },
-          { icon: 'bar_chart', label: 'DASH', href: '/dashboard' },
-          { icon: 'settings', label: 'CFG', href: '/settings', active: true },
-        ].map(l => (
-          <button
-            key={l.href}
-            onClick={() => router.push(l.href)}
-            className={`flex flex-col items-center gap-1 transition-colors ${l.active ? 'text-primary-fixed' : 'text-secondary hover:text-primary'}`}
-          >
-            <span className="material-symbols-outlined text-xl">{l.icon}</span>
-            <span className="font-label text-[8px] tracking-widest uppercase">{l.label}</span>
-          </button>
-        ))}
-      </nav>
+      <SideNav active="settings" />
 
       <main className="pl-16 pt-14 min-h-screen">
         <div className="relative z-10 p-6 max-w-lg flex flex-col gap-6">

@@ -40,6 +40,12 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_matches_played_at ON matches(played_at DESC);
 `);
 
+// Migration: add grid_size column if it doesn't exist
+const existingColumns = (db.pragma('table_info(matches)') as Array<{ name: string }>).map(c => c.name);
+if (!existingColumns.includes('grid_size')) {
+  db.exec('ALTER TABLE matches ADD COLUMN grid_size INTEGER NOT NULL DEFAULT 5');
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────
 
 export interface PlayerStats {
@@ -49,6 +55,19 @@ export interface PlayerStats {
   losses: number;
   draws: number;
   winRate: number;
+}
+
+export interface GridBreakdown {
+  gridSize: number;
+  matches: number;
+  wins: number;
+  winRate: number;
+}
+
+export interface ExtendedStats {
+  currentStreak: number;
+  avgScore: number;
+  perGrid: GridBreakdown[];
 }
 
 export interface MatchRecord {
@@ -77,8 +96,8 @@ const stmtUpsertPlayer = db.prepare(`
 `);
 
 const stmtRecordMatch = db.prepare(`
-  INSERT INTO matches (id, player1, player2, winner, score_p1, score_p2)
-  VALUES (?, ?, ?, ?, ?, ?)
+  INSERT INTO matches (id, player1, player2, winner, score_p1, score_p2, grid_size)
+  VALUES (?, ?, ?, ?, ?, ?, ?)
 `);
 
 const stmtGetPlayerStats = db.prepare(`
@@ -98,6 +117,31 @@ const stmtGetMatchHistory = db.prepare(`
   WHERE player1 = ? OR player2 = ?
   ORDER BY played_at DESC
   LIMIT 10
+`);
+
+const stmtGetStreakHistory = db.prepare(`
+  SELECT winner, player1, player2
+  FROM matches
+  WHERE player1 = ? OR player2 = ?
+  ORDER BY played_at DESC
+  LIMIT 50
+`);
+
+const stmtGetAvgScore = db.prepare(`
+  SELECT AVG(CASE WHEN player1 = ? THEN score_p1 ELSE score_p2 END) AS avgScore
+  FROM matches
+  WHERE player1 = ? OR player2 = ?
+`);
+
+const stmtGetPerGrid = db.prepare(`
+  SELECT
+    grid_size AS gridSize,
+    COUNT(*) AS matches,
+    SUM(CASE WHEN winner = ? THEN 1 ELSE 0 END) AS wins
+  FROM matches
+  WHERE player1 = ? OR player2 = ?
+  GROUP BY grid_size
+  ORDER BY grid_size
 `);
 
 const stmtGetLeaderboardRaw = db.prepare(`
@@ -132,8 +176,9 @@ export function recordMatch(
   winner: string | null,
   scoreP1: number,
   scoreP2: number,
+  gridSize: number,
 ): void {
-  stmtRecordMatch.run(id, player1, player2, winner, scoreP1, scoreP2);
+  stmtRecordMatch.run(id, player1, player2, winner, scoreP1, scoreP2, gridSize);
   // Invalidate leaderboard cache on new match
   leaderboardCache = null;
 }
@@ -168,6 +213,38 @@ export function getPlayerStats(username: string): PlayerStats {
 
 export function getMatchHistory(username: string): MatchRecord[] {
   return stmtGetMatchHistory.all(username, username) as MatchRecord[];
+}
+
+export function getExtendedStats(username: string): ExtendedStats {
+  // Current win streak
+  const streakRows = stmtGetStreakHistory.all(username, username) as Array<{
+    winner: string | null; player1: string; player2: string;
+  }>;
+  let currentStreak = 0;
+  for (const row of streakRows) {
+    if (row.winner === username) {
+      currentStreak++;
+    } else {
+      break;
+    }
+  }
+
+  // Avg score
+  const avgRow = stmtGetAvgScore.get(username, username, username) as { avgScore: number | null };
+  const avgScore = avgRow?.avgScore != null ? Math.round(avgRow.avgScore * 10) / 10 : 0;
+
+  // Per-grid breakdown
+  const gridRows = stmtGetPerGrid.all(username, username, username) as Array<{
+    gridSize: number; matches: number; wins: number;
+  }>;
+  const perGrid: GridBreakdown[] = gridRows.map(r => ({
+    gridSize: r.gridSize,
+    matches: r.matches,
+    wins: r.wins ?? 0,
+    winRate: r.matches > 0 ? Math.round(((r.wins ?? 0) / r.matches) * 100) : 0,
+  }));
+
+  return { currentStreak, avgScore, perGrid };
 }
 
 export function getLeaderboard(): LeaderboardEntry[] {

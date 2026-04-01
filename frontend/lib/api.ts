@@ -31,9 +31,23 @@ export interface LeaderboardEntry {
   winRate: number;
 }
 
+export interface GridBreakdown {
+  gridSize: number;
+  matches: number;
+  wins: number;
+  winRate: number;
+}
+
+export interface ExtendedStats {
+  currentStreak: number;
+  avgScore: number;
+  perGrid: GridBreakdown[];
+}
+
 export interface StatsResponse {
   stats: PlayerStats;
   history: MatchRecord[];
+  extended: ExtendedStats;
 }
 
 export interface LeaderboardResponse {

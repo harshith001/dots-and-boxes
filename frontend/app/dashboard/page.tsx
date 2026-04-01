@@ -3,31 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSession, getStats, getLeaderboard } from '../../lib/api';
-import type { PlayerStats, MatchRecord, LeaderboardEntry } from '../../lib/api';
-
-function SideNav({ active }: { active: 'dashboard' | 'leaderboard' | 'lobby' | 'settings' }) {
-  const router = useRouter();
-  const links = [
-    { key: 'lobby', label: 'GRID', icon: 'grid_view', href: '/lobby' },
-    { key: 'leaderboard', label: 'LB', icon: 'leaderboard', href: '/leaderboard' },
-    { key: 'dashboard', label: 'DASH', icon: 'bar_chart', href: '/dashboard' },
-    { key: 'settings', label: 'CFG', icon: 'settings', href: '/settings' },
-  ] as const;
-  return (
-    <nav className="fixed left-0 top-14 bottom-0 w-16 bg-surface-container-lowest border-r border-outline-variant/10 flex flex-col items-center pt-6 gap-6 z-40">
-      {links.map(l => (
-        <button
-          key={l.key}
-          onClick={() => router.push(l.href)}
-          className={`flex flex-col items-center gap-1 transition-colors ${active === l.key ? 'text-primary-fixed' : 'text-secondary hover:text-primary'}`}
-        >
-          <span className="material-symbols-outlined text-xl">{l.icon}</span>
-          <span className="font-label text-[8px] tracking-widest uppercase">{l.label}</span>
-        </button>
-      ))}
-    </nav>
-  );
-}
+import type { PlayerStats, MatchRecord, LeaderboardEntry, ExtendedStats } from '../../lib/api';
+import { SideNav } from '../../components/SideNav';
 
 interface StatCardProps {
   label: string;
@@ -50,6 +27,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [username, setUsername] = useState<string | null>(null);
   const [stats, setStats] = useState<PlayerStats | null>(null);
+  const [extended, setExtended] = useState<ExtendedStats | null>(null);
   const [history, setHistory] = useState<MatchRecord[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +46,7 @@ export default function DashboardPage() {
       if (statsData) {
         setStats(statsData.stats);
         setHistory(statsData.history);
+        setExtended(statsData.extended);
       }
       if (lbData) setLeaderboard(lbData.leaderboard);
       setLoading(false);
@@ -123,10 +102,28 @@ export default function DashboardPage() {
             {/* Stats row */}
             <div className="grid grid-cols-4 gap-3">
               <StatCard label="GAMES PLAYED" value={stats?.totalMatches ?? 0} sub="All time" />
-              <StatCard label="WINS" value={stats?.wins ?? 0} sub={`+0 this week`} accent />
-              <StatCard label="LOSSES" value={stats?.losses ?? 0} sub="Last 30 days" />
-              <StatCard label="WIN RATE" value={`${stats?.winRate ?? 0}%`} sub={`${stats?.draws ?? 0} draws`} accent />
+              <StatCard label="WINS" value={stats?.wins ?? 0} sub={`${stats?.draws ?? 0} draws`} accent />
+              <StatCard label="WIN RATE" value={`${stats?.winRate ?? 0}%`} sub={`${stats?.losses ?? 0} losses`} accent />
+              <StatCard label="WIN STREAK" value={extended?.currentStreak ?? 0} sub={`Avg ${extended?.avgScore ?? 0} pts`} />
             </div>
+
+            {/* Per-grid breakdown */}
+            {extended && extended.perGrid.length > 0 && (
+              <div className="bg-surface-container-low border border-outline-variant/10 flex flex-col shrink-0">
+                <div className="px-4 h-11 flex items-center bg-surface-container border-b border-outline-variant/10">
+                  <span className="font-label text-[9px] uppercase tracking-widest text-primary-fixed">GRID BREAKDOWN</span>
+                </div>
+                <div className="grid grid-cols-3 divide-x divide-outline-variant/10">
+                  {extended.perGrid.map(g => (
+                    <div key={g.gridSize} className="flex flex-col items-center justify-center py-4 gap-1">
+                      <span className="font-label text-[8px] uppercase tracking-widest text-secondary/40">{g.gridSize}×{g.gridSize}</span>
+                      <span className="font-headline text-2xl font-bold text-on-surface leading-none">{g.winRate}%</span>
+                      <span className="font-label text-[8px] text-secondary/40">{g.wins}W / {g.matches} PLAYED</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Match history */}
             <div className="flex-1 bg-surface-container-low border border-outline-variant/10 flex flex-col min-h-0">
