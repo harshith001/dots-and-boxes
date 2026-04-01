@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSession, getStats } from '../../lib/api';
-import type { PlayerStats, MatchRecord } from '../../lib/api';
+import { getSession, getStats, getLeaderboard } from '../../lib/api';
+import type { PlayerStats, MatchRecord, LeaderboardEntry } from '../../lib/api';
 
 function SideNav({ active }: { active: 'dashboard' | 'leaderboard' | 'lobby' }) {
   const router = useRouter();
@@ -13,12 +13,12 @@ function SideNav({ active }: { active: 'dashboard' | 'leaderboard' | 'lobby' }) 
     { key: 'dashboard', label: 'DASH', icon: 'bar_chart', href: '/dashboard' },
   ] as const;
   return (
-    <nav className="fixed left-0 top-14 bottom-0 w-16 bg-surface-container-low border-r border-outline-variant/10 flex flex-col items-center pt-6 gap-6 z-40">
+    <nav className="fixed left-0 top-14 bottom-0 w-16 bg-surface-container-lowest border-r border-outline-variant/10 flex flex-col items-center pt-6 gap-6 z-40">
       {links.map(l => (
         <button
           key={l.key}
           onClick={() => router.push(l.href)}
-          className={`flex flex-col items-center gap-1 group transition-colors ${active === l.key ? 'text-primary-fixed' : 'text-secondary hover:text-primary'}`}
+          className={`flex flex-col items-center gap-1 transition-colors ${active === l.key ? 'text-primary-fixed' : 'text-secondary hover:text-primary'}`}
         >
           <span className="material-symbols-outlined text-xl">{l.icon}</span>
           <span className="font-label text-[8px] tracking-widest uppercase">{l.label}</span>
@@ -28,13 +28,19 @@ function SideNav({ active }: { active: 'dashboard' | 'leaderboard' | 'lobby' }) 
   );
 }
 
-interface StatCardProps { label: string; value: string | number; sub?: string }
-function StatCard({ label, value, sub }: StatCardProps) {
+interface StatCardProps {
+  label: string;
+  value: string | number;
+  sub?: string;
+  accent?: boolean;
+}
+function StatCard({ label, value, sub, accent }: StatCardProps) {
   return (
-    <div className="bg-surface-container-high/40 border border-outline-variant/10 p-6">
-      <p className="font-label text-[9px] uppercase tracking-widest text-secondary/60 mb-2">{label}</p>
-      <p className="font-headline text-3xl font-bold text-primary-fixed">{value}</p>
-      {sub && <p className="font-label text-[9px] uppercase tracking-wider text-secondary/40 mt-1">{sub}</p>}
+    <div className={`relative p-5 flex flex-col gap-2 ${accent ? 'bg-surface-container-low border border-primary-fixed/20' : 'bg-surface-container-low border border-outline-variant/10'}`}>
+      {accent && <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary-fixed" />}
+      <p className={`font-label text-[9px] uppercase tracking-widest ${accent ? 'text-primary-fixed' : 'text-secondary/60'}`}>{label}</p>
+      <p className={`font-headline text-4xl font-bold leading-none ${accent ? 'text-primary-fixed' : 'text-on-surface'}`}>{value}</p>
+      {sub && <p className="font-label text-[9px] uppercase tracking-wider text-secondary/40 mt-auto">{sub}</p>}
     </div>
   );
 }
@@ -44,6 +50,7 @@ export default function DashboardPage() {
   const [username, setUsername] = useState<string | null>(null);
   const [stats, setStats] = useState<PlayerStats | null>(null);
   const [history, setHistory] = useState<MatchRecord[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,11 +60,15 @@ export default function DashboardPage() {
         return;
       }
       setUsername(session.operatorName);
-      const data = await getStats(session.operatorName).catch(() => null);
-      if (data) {
-        setStats(data.stats);
-        setHistory(data.history);
+      const [statsData, lbData] = await Promise.all([
+        getStats(session.operatorName).catch(() => null),
+        getLeaderboard().catch(() => null),
+      ]);
+      if (statsData) {
+        setStats(statsData.stats);
+        setHistory(statsData.history);
       }
+      if (lbData) setLeaderboard(lbData.leaderboard);
       setLoading(false);
     });
   }, [router]);
@@ -72,18 +83,30 @@ export default function DashboardPage() {
     );
   }
 
+  const myRank = leaderboard.find(e => e.username === username);
+  const topEntries = leaderboard.slice(0, 4);
+
   return (
-    <div className="min-h-screen bg-background text-primary font-body">
+    <div className="min-h-screen bg-background text-on-surface font-body">
       {/* TopAppBar */}
-      <header className="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-14 bg-surface border-b border-surface-variant/20">
-        <div className="flex items-center gap-4">
-          <span className="font-headline font-bold tracking-tighter text-primary text-lg">MONOCHROME_KINETIC_V1.0</span>
-          <div className="h-4 w-px bg-outline-variant opacity-20" />
-          <span className="font-label uppercase tracking-tight text-xs text-secondary">
-            OPERATOR: <span className="text-primary-fixed">{username}</span>
-          </span>
+      <header className="fixed top-0 w-full z-50 flex items-center px-6 h-14 bg-surface-container-lowest border-b border-outline-variant/10">
+        <div className="flex flex-col flex-1">
+          <span className="font-label text-[9px] uppercase tracking-widest text-primary-fixed">DASHBOARD</span>
+          <span className="font-headline text-sm font-semibold text-on-surface">{username}</span>
         </div>
-        <span className="font-label text-[10px] uppercase tracking-widest text-secondary/40">DASHBOARD</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary-fixed" />
+            <span className="font-label text-[9px] uppercase tracking-widest text-secondary/60">ONLINE</span>
+          </div>
+          <button
+            onClick={() => router.push('/lobby')}
+            className="flex items-center gap-2 h-9 px-4 bg-primary-fixed font-label text-[10px] uppercase tracking-widest text-on-primary-fixed font-bold hover:bg-primary-fixed-dim transition-colors"
+          >
+            <span className="material-symbols-outlined text-sm leading-none">sports_esports</span>
+            PLAY NOW
+          </button>
+        </div>
       </header>
 
       <SideNav active="dashboard" />
@@ -91,65 +114,135 @@ export default function DashboardPage() {
       {/* Main */}
       <main className="pl-16 pt-14 min-h-screen">
         <div className="absolute inset-0 dot-grid opacity-[0.02] pointer-events-none" />
-        <div className="relative z-10 p-8 max-w-4xl">
-          <div className="mb-8">
-            <p className="font-label text-[9px] uppercase tracking-widest text-secondary/40 mb-1">OPERATOR_PROFILE</p>
-            <h1 className="font-headline text-2xl font-bold tracking-tighter text-primary">{username}</h1>
-          </div>
+        <div className="relative z-10 flex h-[calc(100vh-56px)]">
 
-          {/* Stats grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
-            <StatCard label="TOTAL_MATCHES" value={stats?.totalMatches ?? 0} />
-            <StatCard label="VICTORIES" value={stats?.wins ?? 0} />
-            <StatCard label="DEFEATS" value={stats?.losses ?? 0} />
-            <StatCard label="WIN_RATE" value={`${stats?.winRate ?? 0}%`} sub={`${stats?.draws ?? 0} DRAWS`} />
-          </div>
+          {/* Left/Main column */}
+          <div className="flex-1 flex flex-col gap-5 p-6 overflow-y-auto min-w-0">
 
-          {/* Match history */}
-          <div className="bg-surface-container-high/40 border border-outline-variant/10">
-            <div className="px-6 py-4 border-b border-outline-variant/10">
-              <span className="font-label text-[9px] uppercase tracking-widest text-secondary/60">MATCH_HISTORY // LAST 10</span>
+            {/* Stats row */}
+            <div className="grid grid-cols-4 gap-3">
+              <StatCard label="GAMES PLAYED" value={stats?.totalMatches ?? 0} sub="All time" />
+              <StatCard label="WINS" value={stats?.wins ?? 0} sub={`+0 this week`} accent />
+              <StatCard label="LOSSES" value={stats?.losses ?? 0} sub="Last 30 days" />
+              <StatCard label="WIN RATE" value={`${stats?.winRate ?? 0}%`} sub={`${stats?.draws ?? 0} draws`} accent />
             </div>
-            {history.length === 0 ? (
-              <div className="px-6 py-8 text-center">
-                <span className="font-label text-[9px] uppercase tracking-widest text-secondary/30">NO_MATCHES_RECORDED</span>
+
+            {/* Match history */}
+            <div className="flex-1 bg-surface-container-low border border-outline-variant/10 flex flex-col min-h-0">
+              <div className="flex items-center justify-between px-4 h-11 bg-surface-container border-b border-outline-variant/10 shrink-0">
+                <span className="font-label text-[9px] uppercase tracking-widest text-primary-fixed">RECENT MATCHES</span>
+                <button
+                  onClick={() => router.push('/dashboard')}
+                  className="font-label text-[9px] uppercase tracking-widest text-secondary/50 hover:text-secondary transition-colors"
+                >
+                  VIEW ALL
+                </button>
               </div>
-            ) : (
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-outline-variant/10">
-                    {['OPPONENT', 'RESULT', 'SCORE', 'DATE'].map(h => (
-                      <th key={h} className="px-6 py-3 text-left font-label text-[8px] uppercase tracking-widest text-secondary/40">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
+
+              {/* Table header */}
+              <div className="grid grid-cols-[1fr_90px_90px_120px] px-4 h-9 items-center bg-surface-container-lowest border-b border-outline-variant/10 shrink-0">
+                {['OPPONENT', 'SCORE', 'RESULT', 'DATE'].map(h => (
+                  <span key={h} className="font-label text-[8px] uppercase tracking-widest text-secondary/40">{h}</span>
+                ))}
+              </div>
+
+              {history.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <span className="font-label text-[9px] uppercase tracking-widest text-secondary/30">NO_MATCHES_RECORDED</span>
+                </div>
+              ) : (
+                <div className="overflow-y-auto">
                   {history.map(m => {
                     const isP1 = m.player1 === username;
                     const opponent = isP1 ? m.player2 : m.player1;
                     const myScore = isP1 ? m.score_p1 : m.score_p2;
                     const oppScore = isP1 ? m.score_p2 : m.score_p1;
                     const result = m.winner === null ? 'DRAW' : m.winner === username ? 'WIN' : 'LOSS';
-                    const badge =
-                      result === 'WIN' ? 'text-primary-fixed border border-primary-fixed/30 bg-primary-fixed/10' :
-                      result === 'LOSS' ? 'text-red-400 border border-red-400/30 bg-red-400/10' :
-                      'text-secondary border border-secondary/30 bg-secondary/10';
+                    const badgeClass =
+                      result === 'WIN'
+                        ? 'bg-primary-fixed text-on-primary-fixed'
+                        : result === 'LOSS'
+                          ? 'bg-surface-container-highest text-secondary'
+                          : 'bg-surface-container-highest text-secondary';
                     return (
-                      <tr key={m.id} className="border-b border-outline-variant/5 hover:bg-surface-container/30 transition-colors">
-                        <td className="px-6 py-3 font-headline text-sm text-primary">{opponent}</td>
-                        <td className="px-6 py-3">
-                          <span className={`font-label text-[9px] uppercase tracking-widest px-2 py-0.5 ${badge}`}>{result}</span>
-                        </td>
-                        <td className="px-6 py-3 font-label text-xs text-secondary">{myScore} — {oppScore}</td>
-                        <td className="px-6 py-3 font-label text-[9px] text-secondary/40">
+                      <div
+                        key={m.id}
+                        className="grid grid-cols-[1fr_90px_90px_120px] px-4 h-12 items-center border-b border-outline-variant/5 hover:bg-surface-container/40 transition-colors"
+                      >
+                        <span className="font-headline text-sm font-semibold text-on-surface truncate">{opponent}</span>
+                        <span className="font-label text-xs text-secondary">{myScore} — {oppScore}</span>
+                        <span>
+                          <span className={`font-label text-[9px] uppercase tracking-widest px-2 py-0.5 font-bold ${badgeClass}`}>
+                            {result}
+                          </span>
+                        </span>
+                        <span className="font-label text-[9px] text-secondary/40">
                           {new Date(m.played_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </td>
-                      </tr>
+                        </span>
+                      </div>
                     );
                   })}
-                </tbody>
-              </table>
-            )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right panel */}
+          <div className="w-64 shrink-0 flex flex-col gap-3 p-6 pl-0 overflow-y-auto">
+
+            {/* Leaderboard */}
+            <div className="bg-surface-container-low border border-outline-variant/10 flex flex-col">
+              <div className="flex items-center justify-between px-4 h-11 bg-surface-container border-b border-outline-variant/10">
+                <span className="font-label text-[9px] uppercase tracking-widest text-primary-fixed">LEADERBOARD</span>
+                <button
+                  onClick={() => router.push('/leaderboard')}
+                  className="font-label text-[9px] uppercase tracking-widest text-secondary/50 hover:text-secondary transition-colors"
+                >
+                  FULL →
+                </button>
+              </div>
+
+              {topEntries.map(entry => (
+                <div key={entry.username} className="flex items-center gap-3 px-4 h-11 border-b border-outline-variant/5">
+                  <span className="font-label text-[10px] font-bold text-secondary/50 w-6 shrink-0">
+                    {String(entry.rank).padStart(2, '0')}
+                  </span>
+                  <span className="font-headline text-sm font-semibold text-on-surface flex-1 truncate">{entry.username}</span>
+                  <span className="font-label text-[10px] font-bold text-primary-fixed">{entry.wins}W</span>
+                </div>
+              ))}
+
+              {/* Current player's rank */}
+              {myRank && (
+                <div className="flex items-center gap-3 px-4 h-11 bg-surface-container border border-primary-fixed/20">
+                  <span className="font-label text-[10px] font-bold text-primary-fixed w-6 shrink-0">
+                    {String(myRank.rank).padStart(2, '0')}
+                  </span>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="font-headline text-sm font-semibold text-primary-fixed truncate">{myRank.username}</span>
+                    <span className="font-label text-[8px] font-bold text-on-primary-fixed bg-primary-fixed px-1.5 py-0.5 shrink-0">YOU</span>
+                  </div>
+                  <span className="font-label text-[10px] font-bold text-primary-fixed">{myRank.wins}W</span>
+                </div>
+              )}
+            </div>
+
+            {/* Private Match CTA */}
+            <div className="bg-surface-container-low border border-outline-variant/10 flex flex-col gap-3 p-4">
+              <p className="font-label text-[9px] uppercase tracking-widest text-secondary/50">CHALLENGE A FRIEND</p>
+              <p className="font-headline text-lg font-bold text-on-surface leading-tight">Private Match</p>
+              <p className="font-label text-[10px] text-secondary/50 leading-relaxed">
+                Create an invite link and challenge anyone to a 1v1
+              </p>
+              <button
+                onClick={() => router.push('/room/new')}
+                className="flex items-center justify-center gap-2 h-10 w-full bg-primary-fixed font-label text-[9px] uppercase tracking-widest text-on-primary-fixed font-bold hover:bg-primary-fixed-dim transition-colors mt-1"
+              >
+                <span className="material-symbols-outlined text-sm leading-none">link</span>
+                CREATE INVITE
+              </button>
+            </div>
+
           </div>
         </div>
       </main>
